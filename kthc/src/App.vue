@@ -1,26 +1,30 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <LoginLayout>
+    <LoginForm />
+  </LoginLayout>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import LoginLayout from './components/Login/LoginLayout.vue';
+import LoginForm from './components/Login/LoginForm.vue';
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    LoginLayout,
+    LoginForm
   }
 }
 </script>
 
 <style>
+/* Đảm bảo Tailwind CSS được import ở đây hoặc trong main.js */
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  /* margin-top: 60px; Có thể bỏ hoặc điều chỉnh để phù hợp với layout full màn hình */
 }
 </style>
