@@ -12,7 +12,10 @@ const routes = [
     {
         path: '/login',
         name: 'Login',
-        component: LoginPage
+        component: LoginPage,
+        meta: {
+          title: 'Đăng nhập',
+        }
     }
 ]
 
@@ -30,6 +33,11 @@ router.beforeEach((to, from, next) => {
   } else {
     next(); // Cho phép điều hướng
   }
+});
+
+// Navigation Guard để cập nhật tiêu đề trang
+router.afterEach((to, from) => {
+    document.title = to.meta.title ? `${to.meta.title} - NTSOFT KTHC` : 'NTSOFT KTHC';
 });
 
 export default router;

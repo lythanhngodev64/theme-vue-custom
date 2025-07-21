@@ -2,22 +2,9 @@
   <div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
     <div class="bg-white shadow-lg rounded-lg flex flex-col md:flex-row max-w-4xl w-full">
       <div class="w-full md:w-1/2 p-8 flex flex-col justify-center items-center">
-      <div class="swiper mySwiper">
-        <div class="swiper-wrapper">
-          <div class="swiper-slide">
-            <img src="https://nhattamsoft.vn//ckfinder/userfiles/images/H3.png" alt="Ảnh 1" class="w-full h-auto rounded-lg shadow-md">
-          </div>
-          <div class="swiper-slide">
-            <img src="https://nhattamsoft.vn//ckfinder/userfiles/images/H3.png" alt="Ảnh 2" class="w-full h-auto rounded-lg shadow-md">
-          </div>
-          <div class="swiper-slide">
-            <img src="https://nhattamsoft.vn//ckfinder/userfiles/images/H3.png" alt="Ảnh 3" class="w-full h-auto rounded-lg shadow-md">
-          </div>
-        </div>
-        <div class="swiper-pagination"></div>
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
-      </div>
+        <img src="../../assets/images/logo-pm.png" alt="NTSOFT Logo" class="h-40 mb-4">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">NTSOFT KTHC</h1>
+        <p class="text-gray-600 text-center uppercase">Phần mềm Kế toán Hành chính</p>
       </div>
       <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
         <div class="max-w-md w-full">
@@ -73,7 +60,7 @@
           <div class="flex justify-center space-x-4">
               Website:&ensp;
               <a href="https://nhattamsoft.vn" target="_blank" class="text-blue-600 hover:underline">nhattamsoft.vn</a>
-              <a href="#" target="_blank" class="text-blue-600 hover:underline">Hướng dẫn xử dụng</a>
+              <a href="#" target="_blank" class="text-blue-600 hover:underline">Hướng dẫn sử dụng</a>
           </div>
         </div>
       </div>
@@ -82,10 +69,6 @@
 </template>
 
 <script>
-import Swiper from 'swiper';
-import 'swiper/swiper.min.css'; // Core Swiper
-import 'swiper/modules/navigation/navigation.min.css'; // Navigation module
-import 'swiper/modules/pagination/pagination.min.css'; // Pagination module
 //import NstTextInput from '../forms/NtsInputText.vue';
 export default {
   name: 'LoginForm',
@@ -108,28 +91,6 @@ export default {
       this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
     }
   },
-  mounted() {
-    // Khởi tạo slider ở đây
-    new Swiper(".mySwiper", {
-      // Các tùy chọn cấu hình của slider
-      // Ví dụ:
-      slidesPerView: 1,
-      spaceBetween: 30,
-      loop: true,
-      pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
-      },
-      navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev",
-      },
-      autoplay: {
-        delay: 3000, // Tự động chuyển slide sau 3 giây
-        disableOnInteraction: false,
-      },
-    });
-  }
 }
 </script>
 
