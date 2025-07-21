@@ -1,17 +1,22 @@
 <template>
-  <NtsSidebarVertical />
-  <div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">Danh sách Sản phẩm</h1>
-
-    <NtsGrid
-      :columns="columnsTinhThanhPho"
-      :data="dataGridTinhThanhPho"
-      :show-footer="true"
-      :total-columns="['price', 'quantity']"
-      :frozen-rows="[0, 1]"
-      class="max-h-[600px]"
-    />
+  <div class="coloum-12">
+      <NtsSidebarVertical />
   </div>
+  <div class="coloum-9">
+    <div class="p-6">
+        <h1 class="text-2xl font-bold mb-4">Danh sách Sản phẩm</h1>
+
+        <NtsGrid
+        :columns="columnsTinhThanhPho"
+        :data="dataGridTinhThanhPho"
+        :show-footer="true"
+        :total-columns="['price', 'quantity']"
+        :frozen-rows="[0, 1]"
+        class="max-h-[600px]"
+        />
+    </div>
+  </div>
+
 </template>
 
 <script>
