@@ -1,20 +1,22 @@
 <template>
-  <LoginLayout>
+  <router-view/>
+  <!-- <LoginLayout>
     <LoginForm />
-  </LoginLayout>
+  </LoginLayout> -->
 </template>
 
 <script>
-import LoginLayout from './components/Login/LoginLayout.vue';
-import LoginForm from './components/Login/LoginForm.vue';
+// import LoginLayout from './components/Login/LoginLayout.vue';
+// import LoginForm from './components/Login/LoginForm.vue';
 
-export default {
-  name: 'App',
-  components: {
-    LoginLayout,
-    LoginForm
-  }
-}
+// export default {
+//   name: 'App',
+//   components: {
+//     LoginLayout,
+//     LoginForm
+//   }
+// }
+
 </script>
 
 <style>
