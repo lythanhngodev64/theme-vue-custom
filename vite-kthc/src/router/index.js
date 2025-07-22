@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { verifyAuthToken } from '../utils/auth';
 // LoginForm vẫn có thể import tĩnh nếu bạn muốn nó luôn có sẵn ngay từ đầu
 // vì đây là trang đầu tiên người dùng thường xuyên truy cập.
 // Nếu muốn lazy load LoginForm, bạn cũng có thể thay đổi nó.
@@ -60,15 +61,41 @@ const router = createRouter({
 });
 
 // Navigation guard để kiểm tra trạng thái đăng nhập trước khi điều hướng
-router.beforeEach((to, from, next) => {
-  // [Chưa xác minh] Kiểm tra nếu route yêu cầu xác thực và người dùng chưa đăng nhập
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login'); // Chuyển hướng về trang đăng nhập
+router.beforeEach(async (to, from, next) => { // Thêm async ở đây
+  const loggedIn = localStorage.getItem('accessToken');
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+
+  if (requiresAuth) {
+    // Nếu route yêu cầu xác thực
+    if (!loggedIn) {
+      // Nhưng không có token trong localStorage, chuyển hướng đến login
+      next({ name: 'Login' });
+    } else {
+      // Có token, kiểm tra tính hợp lệ của token với API
+      const isValidToken = await verifyAuthToken(); // Gọi hàm kiểm tra API
+      if (isValidToken) {
+        next(); // Token hợp lệ, cho phép đi tiếp
+      } else {
+        // Token không hợp lệ (hết hạn/bị thu hồi), chuyển hướng đến login
+        // Có thể hiển thị toast thông báo ở đây: this.$toast.error('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
+        next({ name: 'Login' });
+      }
+    }
+  } else if (to.name === 'Login' && loggedIn) {
+    // Nếu người dùng đã đăng nhập (có token trong localStorage)
+    // và cố gắng truy cập lại trang login
+    const isValidToken = await verifyAuthToken();
+    if (isValidToken) {
+      // Nếu token vẫn hợp lệ, chuyển hướng về dashboard
+      next({ name: 'Dashboard' });
+    } else {
+      // Nếu token không hợp lệ, cho phép truy cập trang login để đăng nhập lại
+      next();
+    }
   } else {
-    next(); // Cho phép điều hướng
+    next(); // Không yêu cầu xác thực, cho phép đi tiếp
   }
 });
-
 // Navigation Guard để cập nhật tiêu đề trang
 router.afterEach((to, from) => {
     document.title = to.meta.title ? `${to.meta.title} - NTSOFT KTHC` : 'NTSOFT KTHC';

@@ -100,7 +100,7 @@ export default {
 
         console.log('Đăng nhập thành công!', response.data);
 
-        // Đảm bảo tên biến khớp với response từ API
+        // Sửa lỗi ở đây: Thay đổi tên biến để khớp với PascalCase từ API response
         const { tokenType, accessToken, expiresIn, refreshToken } = response.data;
 
         localStorage.setItem('accessToken', accessToken);
@@ -108,22 +108,19 @@ export default {
         localStorage.setItem('tokenExpiresIn', expiresIn);
         localStorage.setItem('tokenType', tokenType);
 
-        // Sử dụng this.$toast.success() từ thư viện
         this.$toast.success('Đăng nhập thành công!');
-        
-        // Chuyển hướng người dùng đến trang chính hoặc dashboard
-        this.$router.push('/'); // <-- Thêm dòng này để chuyển hướng
+
+        // Chuyển hướng người dùng đến route chính của DefaultLayout
+        this.$router.push('/');
+
       } catch (error) {
         console.error('Lỗi khi đăng nhập:', error);
         let errorMessage = 'Đã xảy ra lỗi không xác định trong quá trình đăng nhập.';
         if (error.response) {
-          // Lỗi từ server (ví dụ: 401 Unauthorized, 400 Bad Request)
           errorMessage = `Đăng nhập thất bại: ${error.response.data.Message || error.response.statusText}`;
         } else if (error.request) {
-          // Yêu cầu được gửi nhưng không nhận được phản hồi (ví dụ: mất mạng, CORS)
           errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng hoặc địa chỉ API.';
         }
-        // Sử dụng this.$toast.error() từ thư viện
         this.$toast.error(errorMessage);
       }
     },
