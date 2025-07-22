@@ -66,47 +66,25 @@
       </div>
     </div>
   </div>
-
-  <ToastNotification
-    :message="notification.message"
-    :type="notification.type"
-    :duration="notification.duration"
-    v-if="notification.isVisible"
-    @hidden="notification.isVisible = false"
-  />
-</template>
+  </template>
 
 <script>
 import axios from 'axios';
-// KHÔNG CẦN import ToastNotification nữa khi nó là global
-// import ToastNotification from '../../components/ToastNotification.vue';
+// Import useToast cho Vue 3 Composition API nếu bạn dùng setup()
+// import { useToast } from 'vue-toast-notification';
 
 export default {
   name: 'LoginForm',
-  // KHÔNG CẦN khai báo components nữa khi ToastNotification là global
-  // components: {
-  //   ToastNotification
-  // },
+  // Không cần components object nếu không dùng component tùy chỉnh nào khác
+  // components: {},
   data() {
     return {
       username: '',
       password: '',
       passwordFieldType: 'password',
-      notification: {
-        isVisible: false,
-        message: '',
-        type: 'info', // success, error, warning, info
-        duration: 3000
-      }
     };
   },
   methods: {
-    showNotification(message, type = 'info', duration = 3000) {
-      this.notification.message = message;
-      this.notification.type = type;
-      this.notification.duration = duration;
-      this.notification.isVisible = true;
-    },
     async loginSystem() {
       const loginData = {
         tenDangNhap: this.username,
@@ -122,6 +100,7 @@ export default {
 
         console.log('Đăng nhập thành công!', response.data);
 
+        // Đảm bảo tên biến khớp với response từ API
         const { tokenType, accessToken, expiresIn, refreshToken } = response.data;
 
         localStorage.setItem('accessToken', accessToken);
@@ -129,19 +108,23 @@ export default {
         localStorage.setItem('tokenExpiresIn', expiresIn);
         localStorage.setItem('tokenType', tokenType);
 
-        this.showNotification('Đăng nhập thành công! Token đã được lưu trữ.', 'success');
-
+        // Sử dụng this.$toast.success() từ thư viện
+        this.$toast.success('Đăng nhập thành công!');
+        
         // Chuyển hướng người dùng đến trang chính hoặc dashboard
-        // Ví dụ: this.$router.push('/dashboard');
+        this.$router.push('/'); // <-- Thêm dòng này để chuyển hướng
       } catch (error) {
         console.error('Lỗi khi đăng nhập:', error);
         let errorMessage = 'Đã xảy ra lỗi không xác định trong quá trình đăng nhập.';
         if (error.response) {
+          // Lỗi từ server (ví dụ: 401 Unauthorized, 400 Bad Request)
           errorMessage = `Đăng nhập thất bại: ${error.response.data.Message || error.response.statusText}`;
         } else if (error.request) {
+          // Yêu cầu được gửi nhưng không nhận được phản hồi (ví dụ: mất mạng, CORS)
           errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng hoặc địa chỉ API.';
         }
-        this.showNotification(errorMessage, 'error');
+        // Sử dụng this.$toast.error() từ thư viện
+        this.$toast.error(errorMessage);
       }
     },
     togglePasswordVisibility() {
@@ -149,7 +132,8 @@ export default {
     }
   },
   mounted() {
-    this.showNotification('Chào mừng đến trang đăng nhập!', 'info');
+    // Gọi toast khi component được mount
+    // this.$toast.info('Chào mừng đến trang đăng nhập!');
   }
 }
 </script>
