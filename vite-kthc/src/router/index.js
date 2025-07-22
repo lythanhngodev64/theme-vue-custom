@@ -13,7 +13,7 @@ import NotFoundPage from '../pages/NotFoundPage.vue'; // Trang 404
 const isAuthenticated = false; // Giá trị ban đầu là false, cần được cập nhật khi đăng nhập thành công.
 
 const routes = [
-    { path: '/', redirect: '/login' },
+    //{ path: '/', redirect: '/login' },
     {
         path: '/login',
         name: 'Login',

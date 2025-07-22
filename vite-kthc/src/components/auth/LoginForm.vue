@@ -1,12 +1,12 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+  <div class="min-h-screen flex items-center justify-center p-4 bg-[url(../../assets/images/login-background.jpg)] bg-cover bg-center">
     <div class="bg-white shadow-lg rounded-lg flex flex-col md:flex-row max-w-4xl w-full">
       <div class="w-full md:w-1/2 p-8 flex flex-col justify-center items-center">
         <img src="../../assets/images/logo-pm.png" alt="NTSOFT Logo" class="h-40 mb-4">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">NTSOFT KTHC</h1>
         <p class="text-gray-600 text-center uppercase">Phần mềm Kế toán Hành chính</p>
       </div>
-      <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
+      <div class="w-full md:w-1/2 p-8 flex flex-col justify-center border-l border-gray-200">
         <div class="max-w-md w-full">
           <img src="https://nhattamsoft.vn/Content/themes/Theme_1/lib/img/logo.jpg" alt="NTSOFT Logo" class="h-24 mb-4 mx-auto">
           <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Đăng nhập để làm việc với NTSOFT KTHC</h2>
@@ -109,7 +109,6 @@ export default {
         localStorage.setItem('tokenType', tokenType);
 
         this.$toast.success('Đăng nhập thành công!');
-
         // Chuyển hướng người dùng đến route chính của DefaultLayout
         this.$router.push('/');
 
