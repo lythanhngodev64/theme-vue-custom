@@ -38,15 +38,15 @@
                 </svg>
               </span>
             </div>
-              <button
+            <button
               type="submit"
               class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center"
-              >
+            >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 mr-2">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               Đăng nhập
-              </button>
+            </button>
           </form>
           <div class="flex justify-between mt-4 text-sm">
             <a href="#" class="text-blue-600 hover:underline">Đăng ký</a>
@@ -66,31 +66,91 @@
       </div>
     </div>
   </div>
+
+  <ToastNotification
+    :message="notification.message"
+    :type="notification.type"
+    :duration="notification.duration"
+    v-if="notification.isVisible"
+    @hidden="notification.isVisible = false"
+  />
 </template>
 
 <script>
-//import NstTextInput from '../forms/NtsInputText.vue';
+import axios from 'axios';
+// KHÔNG CẦN import ToastNotification nữa khi nó là global
+// import ToastNotification from '../../components/ToastNotification.vue';
+
 export default {
   name: 'LoginForm',
-  components: {
-    //NstTextInput
-  },
+  // KHÔNG CẦN khai báo components nữa khi ToastNotification là global
+  // components: {
+  //   ToastNotification
+  // },
   data() {
     return {
       username: '',
       password: '',
-      passwordFieldType: 'password'
+      passwordFieldType: 'password',
+      notification: {
+        isVisible: false,
+        message: '',
+        type: 'info', // success, error, warning, info
+        duration: 3000
+      }
     };
   },
   methods: {
-    loginSystem() {
-      // Logic xử lý đăng nhập ở đây
-      alert(`Đăng nhập với username: ${this.username} và Mật khẩu: ${this.password}`);
+    showNotification(message, type = 'info', duration = 3000) {
+      this.notification.message = message;
+      this.notification.type = type;
+      this.notification.duration = duration;
+      this.notification.isVisible = true;
+    },
+    async loginSystem() {
+      const loginData = {
+        tenDangNhap: this.username,
+        matMa: this.password
+      };
+
+      try {
+        const response = await axios.post('https://localhost:7016/api/Auth/login', loginData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log('Đăng nhập thành công!', response.data);
+
+        const { tokenType, accessToken, expiresIn, refreshToken } = response.data;
+
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        localStorage.setItem('tokenExpiresIn', expiresIn);
+        localStorage.setItem('tokenType', tokenType);
+
+        this.showNotification('Đăng nhập thành công! Token đã được lưu trữ.', 'success');
+
+        // Chuyển hướng người dùng đến trang chính hoặc dashboard
+        // Ví dụ: this.$router.push('/dashboard');
+      } catch (error) {
+        console.error('Lỗi khi đăng nhập:', error);
+        let errorMessage = 'Đã xảy ra lỗi không xác định trong quá trình đăng nhập.';
+        if (error.response) {
+          errorMessage = `Đăng nhập thất bại: ${error.response.data.Message || error.response.statusText}`;
+        } else if (error.request) {
+          errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng hoặc địa chỉ API.';
+        }
+        this.showNotification(errorMessage, 'error');
+      }
     },
     togglePasswordVisibility() {
       this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
     }
   },
+  mounted() {
+    this.showNotification('Chào mừng đến trang đăng nhập!', 'info');
+  }
 }
 </script>
 
