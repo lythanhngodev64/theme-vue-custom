@@ -68,6 +68,21 @@ export default {
     getSelectedRows() {
       return this.tabulator ? this.tabulator.getSelectedRows().map(row => row.getData()) : [];
     },
+    setSelectedRows(data) {
+      if (this.tabulator) {
+        this.tabulator.setData(data);
+      }
+    },
+    deselectRows() {
+      if (this.tabulator) {
+        this.tabulator.deselectRow();
+      }
+    },
+    setData(data) {
+      if (this.tabulator) {
+        this.tabulator.setData(data);
+      }
+    },
   },
   beforeUnmount() {
     // Đảm bảo hủy Tabulator khi component bị hủy để tránh rò rỉ bộ nhớ
@@ -84,4 +99,5 @@ export default {
     /* Ví dụ */
     min-height: 200px;
     }
+    
 </style>

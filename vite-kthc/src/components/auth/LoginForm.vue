@@ -66,17 +66,13 @@
       </div>
     </div>
   </div>
-  </template>
+</template>
 
 <script>
 import axios from 'axios';
-// Import useToast cho Vue 3 Composition API nếu bạn dùng setup()
-// import { useToast } from 'vue-toast-notification';
 
 export default {
   name: 'LoginForm',
-  // Không cần components object nếu không dùng component tùy chỉnh nào khác
-  // components: {},
   data() {
     return {
       username: '',
@@ -86,13 +82,16 @@ export default {
   },
   methods: {
     async loginSystem() {
-      const loginData = {
-        tenDangNhap: this.username,
-        matMa: this.password
-      };
-
       try {
-        const response = await axios.post('https://localhost:7016/api/Auth/login', loginData, {
+        // Đảm bảo không có await this.$recaptchaLoaded(); ở đây
+
+        // Gọi reCAPTCHA để lấy token
+        const loginData = {
+          tenDangNhap: this.username,
+          matMa: this.password
+        };
+
+        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/Auth/login`, loginData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -100,7 +99,6 @@ export default {
 
         console.log('Đăng nhập thành công!', response.data);
 
-        // Sửa lỗi ở đây: Thay đổi tên biến để khớp với PascalCase từ API response
         const { tokenType, accessToken, expiresIn, refreshToken } = response.data;
 
         localStorage.setItem('accessToken', accessToken);
@@ -109,7 +107,6 @@ export default {
         localStorage.setItem('tokenType', tokenType);
 
         this.$toast.success('Đăng nhập thành công!');
-        // Chuyển hướng người dùng đến route chính của DefaultLayout
         this.$router.push('/');
 
       } catch (error) {
@@ -128,8 +125,7 @@ export default {
     }
   },
   mounted() {
-    // Gọi toast khi component được mount
-    // this.$toast.info('Chào mừng đến trang đăng nhập!');
+    // Không cần thêm gì ở đây liên quan đến recaptcha
   }
 }
 </script>

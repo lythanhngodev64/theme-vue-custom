@@ -31,7 +31,7 @@ export default {
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (refreshToken) {
-          await axios.post('https://localhost:7016/api/Auth/logout', { refreshToken: refreshToken });
+          await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/Auth/logout`, { refreshToken: refreshToken });
           this.$toast.success('Đã đăng xuất thành công khỏi thiết bị.');
         }
       } catch (error) {

@@ -9,14 +9,11 @@ import 'vue-toast-notification/dist/theme-sugar.css'; // Import CSS của theme 
 const app = createApp(App);
 
 app.use(VueToast, {
-  // Tùy chọn cấu hình toàn cục cho toast
-  position: 'top-right', // Vị trí mặc định
-  duration: 3000,       // Thời gian hiển thị mặc định (ms)
-  queue: false,         // Có xếp hàng thông báo không (true/false)
-  // v.v.
+  position: 'top-right',
+  duration: 3000,
+  queue: false,
 });
 
-app.use(router); // Sử dụng router
+app.use(router);
 
 app.mount('#app');
-// createApp(App).mount('#app')

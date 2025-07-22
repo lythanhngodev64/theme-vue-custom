@@ -12,7 +12,7 @@ export async function verifyAuthToken() {
     // Gửi yêu cầu đến một endpoint được bảo vệ để kiểm tra token.
     // Đây có thể là một endpoint kiểm tra token cụ thể, hoặc đơn giản là một API call bất kỳ
     // mà người dùng đã đăng nhập có quyền truy cập (ví dụ: lấy thông tin người dùng).
-    const response = await axios.get('https://localhost:7016/api/User/profile', { // Thay bằng endpoint phù hợp của bạn
+    const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/User/profile`, { // Thay bằng endpoint phù hợp của bạn
       headers: {
         'Authorization': `Bearer ${accessToken}`
       }
