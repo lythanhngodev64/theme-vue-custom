@@ -38,6 +38,22 @@
                 </svg>
               </span>
             </div>
+            <div class="mb-6">
+              <CustomDropdown
+                :dataSource="dataSelectDonVi"
+                :displayColumns="['code', 'name']"
+                :columnHeaders="['Mã', 'Tên tỉnh']"
+                headerText="" 
+                valueField="id"
+                v-model="selectedProductId"
+                :initialValue="defaultSelectedId"
+                selectedDisplayColumn="name"
+                @selected="handleItemSelected"
+                dropdownWidth="150%"
+                maxHeight="300px"
+                inputClass=""
+              />
+            </div>
             <button
               type="submit"
               class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 flex items-center justify-center"
@@ -70,14 +86,28 @@
 
 <script>
 import axios from 'axios';
+import CustomDropdown from '../controls/NtsDropdown.vue';
 
 export default {
   name: 'LoginForm',
+  components: {
+    CustomDropdown
+  },
   data() {
     return {
       username: '',
       password: '',
       passwordFieldType: 'password',
+      dataSelectDonVi: [
+        { id: null, code: '(Tất cả)', name: '(Tất cả)', price: '(Tất cả)' },
+        { id: 1, code: 'VL', name: 'Vĩnh Long', price: '3.000.000' },
+        { id: 2, code: 'CT', name: 'Cần Thơ', price: '5.000.000' },
+        { id: 3, code: 'ĐT', name: 'Đồng Tháp', price: '2.600.000' },
+        { id: 4, code: 'ĐL', name: 'Đà Lạt', price: '4.100.000' }
+      ],
+      selectedProductId: null,
+      defaultSelectedId: null,
+      formProductId: null
     };
   },
   methods: {
@@ -115,7 +145,7 @@ export default {
         if (error.response) {
           errorMessage = `Đăng nhập thất bại: ${error.response.data.Message || error.response.statusText}`;
         } else if (error.request) {
-          errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng hoặc địa chỉ API.';
+          errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng!';
         }
         this.$toast.error(errorMessage);
       }
