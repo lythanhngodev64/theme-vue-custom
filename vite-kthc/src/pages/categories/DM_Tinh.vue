@@ -231,19 +231,23 @@ const gridColumns = ref([
     headerTitle: 'ID',
     align: 'center',
     editable: false,
-    sortable: true // Cho phép sắp xếp cột ID
+    sortable: true,
+    width: '60px' // Đặt chiều rộng cố định
   },
   {
     field: 'name',
     headerTitle: 'Tên',
     editable: true,
-    sortable: true // Cho phép sắp xếp cột Tên
+    sortable: true,
+    minWidth: '250px' // Đặt chiều rộng tối thiểu
   },
   {
     field: 'tenVietTat',
     headerTitle: 'Tên viết tắt',
     editable: true,
-    sortable: true // Cho phép sắp xếp cột Tên viết tắt
+    sortable: true,
+    width: '120px', // Đặt chiều rộng cố định
+    maxWidth: '150px' // Đặt chiều rộng tối đa
   },
   {
     field: 'age',
@@ -251,7 +255,8 @@ const gridColumns = ref([
     align: 'center',
     dataType: 'number',
     editable: true,
-    sortable: true // Cho phép sắp xếp cột Tuổi
+    sortable: true,
+    width: 80 // Cũng có thể dùng số (sẽ được hiểu là px)
   },
   {
     field: 'city',
@@ -263,7 +268,8 @@ const gridColumns = ref([
     displayColumns: ['text'],
     selectedDisplayColumn: 'text',
     columnHeaders: ['Tỉnh/Thành phố'],
-    sortable: true // Cho phép sắp xếp cột Thành phố
+    sortable: true,
+    width: '250px' // Chiều rộng cho cột dropdown
   },
 ]);
 

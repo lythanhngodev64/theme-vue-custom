@@ -19,7 +19,7 @@
     </div>
 
     <div class="overflow-x-auto nts-grid-table-wrapper" style="max-height: 400px; overflow-y: auto;">
-      <table class="min-w-full table-auto text-sm">
+      <table class="min-w-full table-fixed text-sm">
         <thead class="bg-gray-100 sticky top-0 z-10">
           <tr>
             <th v-if="selectable" class="p-2 w-12 text-center border-r border-gray-200">
@@ -30,13 +30,14 @@
               :key="col.field"
               class="p-2 font-semibold text-gray-600 uppercase tracking-wider relative"
               :class="[`text-${col.align || 'left'}`, { 'border-r border-gray-200': index < visibleColumns.length - 1 }]"
+              :style="getColumnStyle(col)"
             >
               <div class="flex items-center justify-between">
-                <span>{{ col.headerTitle }}</span>
+                <span class="truncate" :title="col.headerTitle">{{ col.headerTitle }}</span>
                 <button
                   v-if="col.sortable !== false"
                   @click="toggleSort(col.field)"
-                  class="ml-2 p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  class="ml-2 p-1 rounded-full hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 flex-shrink-0"
                   :class="{ 'text-blue-600': sortBy === col.field }"
                   aria-label="Sort column"
                 >
@@ -79,6 +80,7 @@
               :colIndex="colIndex"
               @navigate-edit="handleNavigateEdit"
               :class="{ 'border-r border-gray-200': colIndex < visibleColumns.length - 1 }"
+              :style="getColumnStyle(col)"
             >
               <template #default="slotProps">
                 <slot :name="`cell-${col.field}`" v-bind="slotProps"></slot>
@@ -140,7 +142,7 @@ const props = defineProps({
 });
 const emit = defineEmits([
   'onLoad', 'onRender', 'onRowClick', 'onSelectRow', 'onDeselectRow',
-  'onCallback', 'onUpdate:data', 'onSort' // Thêm sự kiện onSort
+  'onCallback', 'onUpdate:data', 'onSort'
 ]);
 
 const internalData = ref(JSON.parse(JSON.stringify(props.data)));
@@ -148,32 +150,30 @@ const globalSearch = ref('');
 const currentPage = ref(1);
 const itemsPerPage = ref(10);
 const selectedRows = ref(new Set());
-const editingCell = ref(null); // { rowIndex, colIndex }
+const editingCell = ref(null);
 
-// Biến trạng thái sắp xếp
 const sortBy = ref(null);
-const sortDirection = ref('asc'); // 'asc' hoặc 'desc'
+const sortDirection = ref('asc');
 
 const visibleColumns = computed(() => props.columns.filter(c => c.visible !== false));
 const editableColumns = computed(() => visibleColumns.value.filter(c => c.editable));
 
 const sortedData = computed(() => {
-  let data = [...internalData.value]; // Bắt đầu từ dữ liệu gốc
+  let data = [...internalData.value];
   if (sortBy.value) {
     const column = props.columns.find(c => c.field === sortBy.value);
     if (column) {
       data.sort((a, b) => {
         const valA = a[sortBy.value];
         const valB = b[sortBy.value];
-
-        // Xử lý sắp xếp theo kiểu dữ liệu nếu cần (ví dụ: số, chuỗi, ngày)
         let comparison = 0;
+        if (valA === null || valA === undefined) return 1;
+        if (valB === null || valB === undefined) return -1;
         if (typeof valA === 'string' && typeof valB === 'string') {
           comparison = valA.localeCompare(valB);
         } else {
           comparison = valA < valB ? -1 : (valA > valB ? 1 : 0);
         }
-
         return sortDirection.value === 'asc' ? comparison : -comparison;
       });
     }
@@ -183,7 +183,7 @@ const sortedData = computed(() => {
 
 const filteredData = computed(() => {
   emit('onLoad');
-  let dataToFilter = sortedData.value; // Lọc trên dữ liệu đã sắp xếp
+  let dataToFilter = sortedData.value;
 
   if (!globalSearch.value) {
     return dataToFilter;
@@ -195,7 +195,9 @@ const filteredData = computed(() => {
     });
   });
 });
+
 const totalPages = computed(() => Math.ceil(filteredData.value.length / itemsPerPage.value));
+
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage.value;
   const end = start + itemsPerPage.value;
@@ -203,6 +205,7 @@ const paginatedData = computed(() => {
   emit('onRender', data);
   return data;
 });
+
 const pageInfo = computed(() => {
     const total = filteredData.value.length;
     if(total === 0) return { start: 0, end: 0};
@@ -210,6 +213,7 @@ const pageInfo = computed(() => {
     const end = Math.min(start + itemsPerPage.value - 1, total);
     return { start, end };
 });
+
 const allSelected = computed(() => {
     if(!props.selectable || paginatedData.value.length === 0) return false;
     return paginatedData.value.every(row => isRowSelected(row));
@@ -217,10 +221,10 @@ const allSelected = computed(() => {
 
 watch(itemsPerPage, () => { currentPage.value = 1; });
 watch(globalSearch, () => { currentPage.value = 1; });
+
 watch(() => props.data, (newData) => {
   internalData.value = JSON.parse(JSON.stringify(newData));
   selectedRows.value.clear();
-  // Reset sắp xếp khi dữ liệu đầu vào thay đổi, hoặc giữ lại nếu muốn
   sortBy.value = null;
   sortDirection.value = 'asc';
 }, { deep: true });
@@ -228,11 +232,14 @@ watch(() => props.data, (newData) => {
 const changePage = (page) => {
   if (page >= 1 && page <= totalPages.value) { currentPage.value = page; }
 };
+
 const handleRowClick = (row, event) => {
-  if (event.target.type === 'checkbox' || event.target.closest('button')) return; // Bỏ qua nếu click vào nút sắp xếp
+  if (event.target.type === 'checkbox' || event.target.closest('button')) return;
   emit('onRowClick', row);
 };
+
 const isRowSelected = (row) => selectedRows.value.has(row[props.rowKeyField]);
+
 const toggleRowSelection = (row) => {
   const key = row[props.rowKeyField];
   if (selectedRows.value.has(key)) {
@@ -243,6 +250,7 @@ const toggleRowSelection = (row) => {
     emit('onSelectRow', row);
   }
 };
+
 const toggleSelectAll = (event) => {
     const isChecked = event.target.checked;
     paginatedData.value.forEach(row => {
@@ -280,18 +288,17 @@ const cancelEdit = () => {
   editingCell.value = null;
 };
 
+// SỬA ĐỔI: Khôi phục lại logic đúng cho hàm handleNavigateEdit
 const handleNavigateEdit = async ({ rowIndex, colIndex, shiftKey }) => {
   let targetColIndex = colIndex;
   let targetRowIndex = rowIndex;
   let foundNextCell = false;
-
   let loopCount = 0;
-  const maxLoop = visibleColumns.value.length * paginatedData.value.length * 2 + 5;
+  const maxLoop = visibleColumns.value.length * paginatedData.value.length * 2;
 
   while (!foundNextCell && loopCount < maxLoop) {
     loopCount++;
-
-    if (shiftKey) { // Shift + Tab (di chuyển sang trái)
+    if (shiftKey) { // Di chuyển sang trái
       targetColIndex--;
       if (targetColIndex < 0) {
         targetColIndex = visibleColumns.value.length - 1;
@@ -302,36 +309,31 @@ const handleNavigateEdit = async ({ rowIndex, colIndex, shiftKey }) => {
             await nextTick();
             targetRowIndex = paginatedData.value.length - 1;
           } else {
-            targetRowIndex = 0;
+            targetRowIndex = 0; // Quay về ô đầu tiên
             targetColIndex = 0;
-            break;
+            break; // Dừng tìm kiếm
           }
         }
       }
-    } else { // Tab (di chuyển sang phải)
+    } else { // Di chuyển sang phải
       targetColIndex++;
       if (targetColIndex >= visibleColumns.value.length) {
         targetColIndex = 0;
         targetRowIndex++;
-        if (targetRowIndex >= paginatedData.value.length) { // Dùng paginatedData.value.length trực tiếp
+        if (targetRowIndex >= paginatedData.value.length) {
           if (currentPage.value < totalPages.value) {
             changePage(currentPage.value + 1);
             await nextTick();
             targetRowIndex = 0;
           } else {
-            targetRowIndex = paginatedData.value.length - 1; // Dùng paginatedData.value.length trực tiếp
+             // Đã ở cuối, dừng lại
+            targetRowIndex = paginatedData.value.length - 1;
             targetColIndex = visibleColumns.value.length - 1;
-            break;
+            break; // Dừng tìm kiếm
           }
         }
       }
     }
-
-    if (targetRowIndex < 0 || targetRowIndex >= paginatedData.value.length ||
-        targetColIndex < 0 || targetColIndex >= visibleColumns.value.length) {
-        continue;
-    }
-
     const isTargetEditable = visibleColumns.value[targetColIndex]?.editable;
     if (isTargetEditable) {
       foundNextCell = true;
@@ -339,17 +341,19 @@ const handleNavigateEdit = async ({ rowIndex, colIndex, shiftKey }) => {
   }
 
   if (foundNextCell) {
-    editingCell.value = null; // Tắt ô hiện tại
-    await nextTick(); // Đảm bảo input cũ đã bị xóa khỏi DOM
+    // Tắt ô chỉnh sửa hiện tại
+    editingCell.value = null;
+    // Đợi DOM cập nhật (loại bỏ input cũ)
+    await nextTick();
+    // Kích hoạt ô chỉnh sửa mới
     editingCell.value = { rowIndex: targetRowIndex, colIndex: targetColIndex };
-    // Không cần await nextTick() thứ hai ở đây nếu v-focus được quản lý bằng watch.
-    // watch trong NtsGridCell sẽ tự động gọi nextTick bên trong nó.
   } else {
+    // Nếu không tìm thấy ô nào có thể chỉnh sửa, chỉ cần hủy bỏ ô hiện tại
     editingCell.value = null;
   }
 };
 
-// Hàm xử lý sắp xếp
+
 const toggleSort = (field) => {
   if (sortBy.value === field) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
@@ -357,28 +361,38 @@ const toggleSort = (field) => {
     sortBy.value = field;
     sortDirection.value = 'asc';
   }
-  emit('onSort', { field: sortBy.value, direction: sortDirection.value }); // Phát sự kiện sắp xếp
+  emit('onSort', { field: sortBy.value, direction: sortDirection.value });
 };
 
+const getColumnStyle = (column) => {
+  const style = {};
+  if (column.width) {
+    style.width = typeof column.width === 'number' ? `${column.width}px` : column.width;
+  }
+  if (column.minWidth) {
+    style.minWidth = typeof column.minWidth === 'number' ? `${column.minWidth}px` : column.minWidth;
+  }
+  if (column.maxWidth) {
+    style.maxWidth = typeof column.maxWidth === 'number' ? `${column.maxWidth}px` : column.maxWidth;
+  }
+  return style;
+};
 
 const getData = () => internalData.value;
+
 const getSelectedRows = () => {
   const selectedKeys = Array.from(selectedRows.value);
   return internalData.value.filter(row => selectedKeys.includes(row[props.rowKeyField]));
 };
+
 const refresh = () => {
   emit('onCallback', { type: 'refresh' });
-  console.log('Grid refreshed!');
 };
 
 defineExpose({ getData, getSelectedRows, refresh });
 </script>
 
 <style scoped>
-table {
-  border-collapse: collapse;
-}
-
 th, td {
   border-right: 1px solid #e2e8f0;
 }
@@ -388,11 +402,10 @@ td:last-child {
   border-right: none;
 }
 
-/* Thêm style cho nút sắp xếp */
 th > div {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Để đẩy nút sang phải */
+  justify-content: space-between;
   width: 100%;
 }
 </style>

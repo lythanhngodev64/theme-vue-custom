@@ -4,7 +4,7 @@
     :class="`text-${column.align || 'left'}`"
     @dblclick="activateEdit"
   >
-    <div v-if="!isEditing" class="nts-grid-cell-content">
+    <div v-if="!isEditing" class="nts-grid-cell-content px-1" :class="contentClass">
       <slot :row="row" :value="row[column.field]">
         <span v-if="column.dataType === 'boolean'">
           <span :class="row[column.field] ? 'text-green-500' : 'text-red-500'">
@@ -14,7 +14,7 @@
         <span v-else-if="column.dataType === 'select'">
           {{ getSelectDisplayText(row[column.field], column.options) }}
         </span>
-        <span v-else>{{ row[column.field] }}</span>
+        <span v-else :title="row[column.field]">{{ row[column.field] }}</span>
       </slot>
     </div>
 
@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick } from 'vue';
+import { ref, watch, nextTick, computed } from 'vue'; // Thêm computed
 import NtsDropdown from './NtsDropdown.vue'; // Import NtsDropdown
 
 const props = defineProps({
@@ -85,6 +85,16 @@ const emit = defineEmits(['activate-edit', 'save-edit', 'cancel-edit', 'navigate
 
 const editableValue = ref(null);
 const inputRef = ref(null);
+
+// Computed property để thêm class truncate khi cần
+const contentClass = computed(() => {
+  if (props.column.width || props.column.maxWidth) {
+    // truncate là class của Tailwind: overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    return 'truncate';
+  }
+  return '';
+});
+
 
 watch(() => props.isEditing, async (editing) => {
   if (editing) {
@@ -138,6 +148,7 @@ const handleDropdownSelected = (selectedItem) => {
 
 // Hàm giúp hiển thị text của option cho dataType 'select'
 const getSelectDisplayText = (value, options) => {
+  if (!options) return value;
   const option = options.find(opt => opt.value === value);
   return option ? option.text : value;
 };
@@ -177,8 +188,10 @@ const getSelectDisplayText = (value, options) => {
 
 td {
   position: relative;
+  /* Chuyển các thuộc tính overflow này sang NtsGrid để áp dụng cho cả th và td */
 }
 
+/* Logic ẩn hiện nội dung khi edit */
 .nts-grid-cell-content {
   visibility: visible;
 }
