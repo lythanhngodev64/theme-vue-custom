@@ -14,6 +14,9 @@
         <span v-else-if="column.dataType === 'select'">
           {{ getSelectDisplayText(row[column.field], column.options) }}
         </span>
+         <span v-else-if="column.dataType === 'dropdown'">
+          {{ getDropdownDisplayText(row[column.field]) }}
+        </span>
         <span v-else :title="row[column.field]">{{ row[column.field] }}</span>
       </slot>
     </div>
@@ -25,7 +28,7 @@
         v-model="editableValue"
         @blur="save"
         @keydown.enter.prevent="save"
-        @keydown.esc="cancel"
+        @keydown.esc.prevent="cancel"
         @keydown.tab.prevent="handleTab"
         class="w-full h-full border-none px-1 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 box-border"
         ref="inputRef" />
@@ -47,7 +50,7 @@
         v-model="editableValue"
         @change="save"
         @keydown.tab.prevent="handleTab"
-        class="form-checkbox h-4 w-4 text-blue-600 box-border"
+        class="form-checkbox h-4 w-4 text-blue-600 box-border m-auto"
         ref="inputRef" />
       <NtsDropdown
         v-else-if="column.dataType === 'dropdown'"
@@ -70,8 +73,8 @@
 </template>
 
 <script setup>
-import { ref, watch, nextTick, computed } from 'vue'; // Thêm computed
-import NtsDropdown from './NtsDropdown.vue'; // Import NtsDropdown
+import { ref, watch, nextTick, computed } from 'vue';
+import NtsDropdown from './NtsDropdown.vue';
 
 const props = defineProps({
   row: { type: Object, required: true },
@@ -86,10 +89,8 @@ const emit = defineEmits(['activate-edit', 'save-edit', 'cancel-edit', 'navigate
 const editableValue = ref(null);
 const inputRef = ref(null);
 
-// Computed property để thêm class truncate khi cần
 const contentClass = computed(() => {
   if (props.column.width || props.column.maxWidth) {
-    // truncate là class của Tailwind: overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     return 'truncate';
   }
   return '';
@@ -102,8 +103,7 @@ watch(() => props.isEditing, async (editing) => {
     await nextTick();
     if (inputRef.value && typeof inputRef.value.focus === 'function') {
       inputRef.value.focus();
-    } else if (inputRef.value && inputRef.value.$el && typeof inputRef.value.$el.querySelector('input').focus === 'function') {
-        // Đối với NtsDropdown, focus vào input bên trong nó
+    } else if (inputRef.value && inputRef.value.$el && typeof inputRef.value.$el.querySelector('input')?.focus === 'function') {
         inputRef.value.$el.querySelector('input').focus();
     }
   }
@@ -132,70 +132,53 @@ const handleTab = (event) => {
   });
 };
 
-// Hàm xử lý sự kiện khi NtsDropdown thay đổi giá trị
 const handleDropdownChange = (newValue) => {
   editableValue.value = newValue;
-  // Không cần save ngay lập tức nếu muốn người dùng phải blur hoặc nhấn Enter
-  // Tuy nhiên, với dropdown thường muốn lưu ngay khi chọn
   save();
 };
 
-// Hàm xử lý sự kiện khi NtsDropdown chọn một item (có thể dùng thay cho handleDropdownChange)
 const handleDropdownSelected = (selectedItem) => {
-  editableValue.value = selectedItem[props.column.valueField];
-  save(); // Lưu ngay khi có lựa chọn
+  if (selectedItem) {
+    editableValue.value = selectedItem[props.column.valueField];
+  } else {
+    editableValue.value = null;
+  }
+  save();
 };
 
-// Hàm giúp hiển thị text của option cho dataType 'select'
 const getSelectDisplayText = (value, options) => {
   if (!options) return value;
   const option = options.find(opt => opt.value === value);
   return option ? option.text : value;
 };
+
+const getDropdownDisplayText = (value) => {
+    const { options, valueField, selectedDisplayColumn } = props.column;
+    if (!options || value == null) return value;
+    const item = options.find(opt => opt[valueField] === value);
+    return item ? item[selectedDisplayColumn] : value;
+};
 </script>
 
 <style scoped>
-.nts-grid-cell-edit-mode input,
+.nts-grid-cell-edit-mode input[type="text"],
 .nts-grid-cell-edit-mode select {
   box-sizing: border-box;
-  padding: 0;
+  padding: 0 0.25rem;
   border: none;
-  font-size: 0.875rem;
-  line-height: 1.25rem;
+  font-size: inherit;
+  line-height: inherit;
 }
-
-/* Thêm style cho NtsDropdown để nó lấp đầy ô */
 .nts-grid-cell-edit-mode .nts-dropdown {
   width: 100%;
   height: 100%;
 }
-.nts-grid-cell-edit-mode .nts-dropdown .dropdown-control input {
-    width: 100%; /* Đảm bảo input bên trong dropdown cũng full width */
-    height: 100%;
-    border-radius: 0; /* Loại bỏ bo góc mặc định của dropdown input */
-    padding-left: 0.5rem; /* Padding tương tự các input khác */
-    padding-right: 0.5rem;
-}
-
 .nts-grid-cell-edit-mode {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   padding: 0;
 }
-
 td {
   position: relative;
-  /* Chuyển các thuộc tính overflow này sang NtsGrid để áp dụng cho cả th và td */
-}
-
-/* Logic ẩn hiện nội dung khi edit */
-.nts-grid-cell-content {
-  visibility: visible;
-}
-.nts-grid-cell-edit-mode + .nts-grid-cell-content {
-  visibility: hidden;
 }
 </style>

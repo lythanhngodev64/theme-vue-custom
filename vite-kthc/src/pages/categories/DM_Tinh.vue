@@ -90,174 +90,26 @@ const vietnameseProvinces = ref([
 
 // --- Dữ liệu và Cấu hình ---
 const users = ref([
-  {
-    "id": 1,
-    "name": "Bác Vũ Phạm",
-    "tenVietTat": "BVP", // Thêm cột tenVietTat
-    "age": 44,
-    "city": "Hà Nội" // Đảm bảo giá trị khớp với 'value' trong vietnameseProvinces
-  },
-  {
-    "id": 2,
-    "name": "Anh Khoa Nguyễn",
-    "tenVietTat": "AKN",
-    "age": 27,
-    "city": "TP.HCM"
-  },
-  {
-    "id": 3,
-    "name": "Cô Mai Vũ",
-    "tenVietTat": "CMV",
-    "age": 35,
-    "city": "Đà Nẵng"
-  },
-  {
-    "id": 4,
-    "name": "Bảo Bùi",
-    "tenVietTat": "BB",
-    "age": 34,
-    "city": "Cần Thơ"
-  },
-  {
-    "id": 5,
-    "name": "An Hải Trần",
-    "tenVietTat": "AHT",
-    "age": 27,
-    "city": "An Giang"
-  },
-  {
-    "id": 6,
-    "name": "Hạnh Phạm",
-    "tenVietTat": "HP",
-    "age": 37,
-    "city": "Đồng Nai"
-  },
-  {
-    "id": 7,
-    "name": "An Đặng",
-    "tenVietTat": "AD",
-    "age": 44,
-    "city": "Thanh Hóa"
-  },
-  {
-    "id": 8,
-    "name": "Nam Phú Dương",
-    "tenVietTat": "NPD",
-    "age": 54,
-    "city": "Nghệ An"
-  },
-  {
-    "id": 9,
-    "name": "Nhật Trần",
-    "tenVietTat": "NT",
-    "age": 59,
-    "city": "Hải Phòng"
-  },
-  {
-    "id": 10,
-    "name": "Phương Nguyễn",
-    "tenVietTat": "PN",
-    "age": 21,
-    "city": "Bình Dương"
-  },
-  {
-    "id": 11,
-    "name": "Tú Mai Dương",
-    "tenVietTat": "TMD",
-    "age": 20,
-    "city": "Khánh Hòa"
-  },
-  {
-    "id": 12,
-    "name": "Thảo Đặng",
-    "tenVietTat": "TD",
-    "age": 39,
-    "city": "Quảng Ninh"
-  },
-  {
-    "id": 13,
-    "name": "Bà Bảo Đặng",
-    "tenVietTat": "BBD",
-    "age": 24,
-    "city": "Vĩnh Long"
-  },
-  {
-    "id": 14,
-    "name": "Ánh Trần",
-    "tenVietTat": "AT",
-    "age": 20,
-    "city": "Kiên Giang"
-  },
-  {
-    "id": 15,
-    "name": "Bà Duyên Bùi",
-    "tenVietTat": "BDB",
-    "age": 26,
-    "city": "Long An"
-  },
-  {
-    "id": 16,
-    "name": "Quang Lê",
-    "tenVietTat": "QL",
-    "age": 47,
-    "city": "Lâm Đồng"
-  },
-  {
-    "id": 17,
-    "name": "Kim Đức Vũ",
-    "tenVietTat": "KDV",
-    "age": 51,
-    "city": "Thừa Thiên Huế"
-  },
-  {
-    "id": 18,
-    "name": "Anh Trí Phạm",
-    "tenVietTat": "ATP",
-    "age": 31,
-    "city": "Đắk Lắk"
-  },
-  {
-    "id": 19,
-    "name": "Thảo Hoàng",
-    "tenVietTat": "TH",
-    "age": 28,
-    "city": "Gia Lai"
-  }
+    { id: 1, name: "Bác Vũ Phạm", tenVietTat: "BVP", age: 44, city: "Hà Nội" },
+    { id: 2, name: "Anh Khoa Nguyễn", tenVietTat: "AKN", age: 27, city: "TP.HCM" },
+    { id: 3, name: "Cô Mai Vũ", tenVietTat: "CMV", age: 35, city: "Đà Nẵng" },
+    { id: 4, name: "Bảo Bùi", tenVietTat: "BB", age: 34, city: "Cần Thơ" },
+    { id: 5, name: "An Hải Trần", tenVietTat: "AHT", age: 27, city: "An Giang" },
+    { id: 6, name: "Hạnh Phạm", tenVietTat: "HP", age: 37, city: "Đồng Nai" },
+    { id: 7, name: "An Đặng", tenVietTat: "AD", age: 44, city: "Thanh Hóa" },
+    { id: 8, name: "Nam Phú Dương", tenVietTat: "NPD", age: 54, city: "Nghệ An" },
+    { id: 9, name: "Nhật Trần", tenVietTat: "NT", age: 59, city: "Hải Phòng" },
+    { id: 10, name: "Phương Nguyễn", tenVietTat: "PN", age: 21, city: "Bình Dương" },
+    { id: 11, name: "Tú Mai Dương", tenVietTat: "TMD", age: 20, city: "Hà Nội" },
+    { id: 12, name: "Thảo Đặng", tenVietTat: "TD", age: 39, city: "Quảng Ninh" },
+    { id: 13, name: "Bà Bảo Đặng", tenVietTat: "BBD", age: 24, city: "TP.HCM" },
 ]);
 
 const gridColumns = ref([
-  {
-    field: 'id',
-    headerTitle: 'ID',
-    align: 'center',
-    editable: false,
-    sortable: true,
-    width: '60px' // Đặt chiều rộng cố định
-  },
-  {
-    field: 'name',
-    headerTitle: 'Tên',
-    editable: true,
-    sortable: true,
-    minWidth: '250px' // Đặt chiều rộng tối thiểu
-  },
-  {
-    field: 'tenVietTat',
-    headerTitle: 'Tên viết tắt',
-    editable: true,
-    sortable: true,
-    width: '120px', // Đặt chiều rộng cố định
-    maxWidth: '150px' // Đặt chiều rộng tối đa
-  },
-  {
-    field: 'age',
-    headerTitle: 'Tuổi',
-    align: 'center',
-    dataType: 'number',
-    editable: true,
-    sortable: true,
-    width: 80 // Cũng có thể dùng số (sẽ được hiểu là px)
-  },
+  { field: 'id', headerTitle: 'ID', align: 'center', editable: false, sortable: true, width: '60px' },
+  { field: 'name', headerTitle: 'Tên', editable: true, sortable: true, minWidth: '250px' },
+  { field: 'tenVietTat', headerTitle: 'Tên viết tắt', editable: true, sortable: true, width: '120px', maxWidth: '150px' },
+  { field: 'age', headerTitle: 'Tuổi', align: 'center', dataType: 'number', editable: true, sortable: true, width: 80 },
   {
     field: 'city',
     headerTitle: 'Thành phố',
@@ -269,7 +121,8 @@ const gridColumns = ref([
     selectedDisplayColumn: 'text',
     columnHeaders: ['Tỉnh/Thành phố'],
     sortable: true,
-    width: '250px' // Chiều rộng cho cột dropdown
+    width: '250px',
+    groupable: true // <-- Cho phép nhóm theo cột này
   },
 ]);
 
@@ -281,12 +134,10 @@ const addUser = () => {
   userArray.push({
     id: newId,
     name: `Người dùng ${newId}`,
-    tenVietTat: `ND${newId}`, // Giá trị mặc định cho cột mới
+    tenVietTat: `ND${newId}`,
     age: Math.floor(Math.random() * 20) + 20,
-    city: 'Hà Nội', // Giá trị mặc định khi thêm mới
+    city: 'Hà Nội',
   });
-
-  console.log(`Đã thêm người dùng mới: Người dùng ${newId}`);
 };
 
 const handleDataUpdate = (updatedData) => {
@@ -294,11 +145,8 @@ const handleDataUpdate = (updatedData) => {
   users.value = updatedData;
 };
 
-// Xử lý sự kiện sắp xếp từ NtsGrid
 const handleSort = ({ field, direction }) => {
   console.log(`Grid được sắp xếp theo cột: ${field}, hướng: ${direction}`);
-  // Logic sắp xếp đã được xử lý bên trong NtsGrid thông qua sortedData computed property.
-  // Bạn có thể thêm logic backend call ở đây nếu cần sắp xếp từ server.
 };
 
 </script>
