@@ -13,7 +13,7 @@
             placeholder="Tìm kiếm..." />
         </div>
         
-        <div v-if="groupableColumns.length > 0" class="flex items-center gap-2">
+        <div v-if="groupableColumns.length > 0 && showGrouping == true" class="flex items-center gap-2">
           <label for="group-by-select" class="text-sm font-medium text-gray-700">Nhóm theo:</label>
           <select
             id="group-by-select"
@@ -138,7 +138,8 @@ const props = defineProps({
   columns: { type: Array, required: true },
   data: { type: Array, required: true },
   rowKeyField: { type: String, required: true },
-  selectable: { type: Boolean, default: false }
+  selectable: { type: Boolean, default: false },
+  showGrouping: { type: Boolean, default: false }
 });
 
 const emit = defineEmits([

@@ -10,7 +10,7 @@
         @keydown.up.prevent="navigateUp"
         @keydown.enter.prevent="selectHighlighted"
         :class="['w-full', 'px-4', 'py-2', 'border', 'border-gray-300', 'rounded-md', 'focus:outline-none', inputClass]"
-        placeholder="Tìm kiếm hoặc chọn..."
+        :placeholder="placeholder"
         />
       <button @click="toggleDropdown" class="dropdown-button" type="button">▼</button>
     </div>
@@ -29,6 +29,7 @@
         v-for="(item, index) in filteredDataSource"
         :key="item[valueField]"
         @click="selectItem(item)"
+        class="cursor-pointer"
         :class="{
           'highlighted': index === highlightedIndex,
           'selected-item-highlight': selectedItem && item[valueField] === selectedItem[valueField]
@@ -86,7 +87,11 @@ export default {
     maxHeight: {
       type: String,
       default: '200px' // Giá trị mặc định nếu không được cung cấp
-    }
+    },
+    placeholder: {
+      type: String,
+      default: 'Tìm kiếm hoặc chọn...'
+    },
   },
   data() {
     return {
@@ -170,6 +175,13 @@ export default {
       if (!this.selectedItem) {
         this.highlightedIndex = -1;
       }
+    },
+    focus() {
+      this.$nextTick(() => {
+        if (this.$refs.inputRef) {
+          this.$refs.inputRef.focus();
+        }
+      });
     },
     onSearchInput(event) {
         this.searchText = event.target.value;

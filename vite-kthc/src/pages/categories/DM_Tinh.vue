@@ -7,6 +7,7 @@
         :columns="gridColumns"
         row-key-field="id"
         :selectable="true"
+        :show-grouping="false"
         @on-update:data="handleDataUpdate"
         @on-sort="handleSort" />
     </div>

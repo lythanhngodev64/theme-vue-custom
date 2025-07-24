@@ -38,20 +38,22 @@
                 </svg>
               </span>
             </div>
-            <div class="mb-6">
-              <CustomDropdown
+            <div class="mb-6 relative">
+              <DropdownDonVi
+                ref="dropdownDonViRef"
                 :dataSource="dataSelectDonVi"
-                :displayColumns="['code', 'name']"
-                :columnHeaders="['Mã', 'Tên tỉnh']"
+                :displayColumns="['MaDonVi', 'TenDonVi']"
+                :columnHeaders="['Mã', 'Tên đơn vị']"
                 headerText="" 
-                valueField="id"
-                v-model="selectedProductId"
+                valueField="DonViID"
+                v-model="selectedDonViID"
                 :initialValue="defaultSelectedId"
                 selectedDisplayColumn="name"
                 @selected="handleItemSelected"
-                dropdownWidth="150%"
+                dropdownWidth="100%"
                 maxHeight="300px"
                 inputClass=""
+                placeholder="Chọn đơn vị"
               />
             </div>
             <button
@@ -86,39 +88,66 @@
 
 <script>
 import axios from 'axios';
-import CustomDropdown from '../controls/NtsDropdown.vue';
+import DropdownDonVi from '../controls/NtsDropdown.vue';
 
 export default {
   name: 'LoginForm',
   components: {
-    CustomDropdown
+    DropdownDonVi
   },
   data() {
     return {
       username: '',
       password: '',
       passwordFieldType: 'password',
-      dataSelectDonVi: [
-        { id: null, code: '(Tất cả)', name: '(Tất cả)', price: '(Tất cả)' },
-        { id: 1, code: 'VL', name: 'Vĩnh Long', price: '3.000.000' },
-        { id: 2, code: 'CT', name: 'Cần Thơ', price: '5.000.000' },
-        { id: 3, code: 'ĐT', name: 'Đồng Tháp', price: '2.600.000' },
-        { id: 4, code: 'ĐL', name: 'Đà Lạt', price: '4.100.000' }
-      ],
-      selectedProductId: null,
+      dataSelectDonVi: [],
+      selectedDonViID: null,
       defaultSelectedId: null,
       formProductId: null
     };
   },
   methods: {
+    // Phương thức mới để tải dữ liệu đơn vị từ API
+    async loadDonViData() {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/DonVi/alldonvi`);
+        
+        if (response.data && response.data.results) {
+          // Chuyển đổi dữ liệu từ API để khớp với các props của NtsDropdown
+          // (DonViID -> id, MaDonVi -> code, TenDonVi -> name)
+          const formattedData = response.data.results.map(donvi => ({
+            DonViID: donvi.DonViID,
+            MaDonVi: donvi.MaDonVi,
+            TenDonVi: donvi.TenDonVi
+          }));
+          // Thêm tùy chọn "(Tất cả)" vào đầu danh sách
+          this.dataSelectDonVi = [
+            ...formattedData
+          ];
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải danh sách đơn vị:', error);
+        this.$toast.error('Không thể tải danh sách đơn vị. Vui lòng thử lại.');
+      }
+    },
     async loginSystem() {
       try {
-        // Đảm bảo không có await this.$recaptchaLoaded(); ở đây
+        // 1. Kiểm tra xem người dùng đã chọn đơn vị chưa
+        // Lưu ý: Đảm bảo rằng bạn có một biến `selectedDonViID` trong data()
+        // và nó được liên kết với v-model của DropdownDonVi.
+        if (!this.selectedDonViID) { 
+          this.$toast.error('Vui lòng chọn đơn vị trước khi đăng nhập.');
+          if (this.$refs.dropdownDonViRef) {
+            this.$refs.dropdownDonViRef.focus();
+          }
+          return;
+        }
 
-        // Gọi reCAPTCHA để lấy token
+        // 2. Chuẩn bị dữ liệu gửi đi, bao gồm cả đơn vị đã chọn
         const loginData = {
           tenDangNhap: this.username,
-          matMa: this.password
+          matMa: this.password,
+          donViId: this.selectedDonViID // Thêm ID đơn vị vào payload
         };
 
         const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/Auth/login`, loginData, {
@@ -127,25 +156,41 @@ export default {
           }
         });
 
-        console.log('Đăng nhập thành công!', response.data);
+        // 3. Xử lý kết quả trả về đúng cấu trúc
+        // Kiểm tra xem API có trả về kết quả hợp lệ không
+        if (response.data && response.data.results && response.data.results.length > 0) {
+          
+          // Lấy thông tin token từ đối tượng đầu tiên trong mảng "results"
+          const { tokenType, accessToken, expiresIn, refreshToken } = response.data.results[0];
 
-        const { tokenType, accessToken, expiresIn, refreshToken } = response.data;
+          // Lưu thông tin vào localStorage
+          localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('refreshToken', refreshToken);
+          localStorage.setItem('tokenExpiresIn', expiresIn);
+          localStorage.setItem('tokenType', tokenType);
 
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
-        localStorage.setItem('tokenExpiresIn', expiresIn);
-        localStorage.setItem('tokenType', tokenType);
-
-        this.$toast.success('Đăng nhập thành công!');
-        this.$router.push('/');
+          this.$toast.success('Đăng nhập thành công!');
+          this.$router.push('/');
+          
+        } else {
+          // Nếu API trả về thành công nhưng không có dữ liệu token, coi đó là một lỗi
+          throw new Error('API không trả về dữ liệu token hợp lệ.');
+        }
 
       } catch (error) {
         console.error('Lỗi khi đăng nhập:', error);
-        let errorMessage = 'Đã xảy ra lỗi không xác định trong quá trình đăng nhập.';
+        let errorMessage = 'Đã xảy ra lỗi không xác định.';
+        
+        // Phân tích lỗi để đưa ra thông báo thân thiện hơn
         if (error.response) {
-          errorMessage = `Đăng nhập thất bại: ${error.response.data.Message || error.response.statusText}`;
+          // Lỗi từ phía server (ví dụ: sai mật khẩu, tài khoản không tồn tại)
+          errorMessage = `Đăng nhập thất bại: ${error.response.data.message || error.response.statusText}`;
         } else if (error.request) {
-          errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng!';
+          // Lỗi không thể kết nối đến server
+          errorMessage = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng!';
+        } else {
+          // Lỗi khác (ví dụ: lỗi cú pháp trong lúc xử lý response)
+          errorMessage = error.message;
         }
         this.$toast.error(errorMessage);
       }
@@ -155,7 +200,7 @@ export default {
     }
   },
   mounted() {
-    // Không cần thêm gì ở đây liên quan đến recaptcha
+    this.loadDonViData();
   }
 }
 </script>
