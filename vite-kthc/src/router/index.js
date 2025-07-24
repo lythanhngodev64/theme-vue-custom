@@ -7,6 +7,7 @@ import LoginPage from '../pages/auth/LoginPage.vue';
 import DefaultLayout from '../layouts/DefaultLayout.vue'; // Layout chính
 import TongQuan from '../pages/dashboard/TongQuan.vue'; // Trang tổng quan
 import DM_Tinh from '../pages/categories/DM_Tinh.vue'; // Ví dụ: Trang danh mục tỉnh
+import Menu from '../pages/systems/Menu.vue'; // Danh mục menu
 import NotFoundPage from '../pages/NotFoundPage.vue'; // Trang 404
 // Đây là một biến giả định trạng thái đăng nhập.
 // [Chưa xác minh] Trong ứng dụng thực tế, bạn sẽ quản lý trạng thái này thông qua Vuex hoặc một global state.
@@ -42,6 +43,14 @@ const routes = [
           component: DM_Tinh, // Component trang Categories
           meta: {
             title: 'Tỉnh/Thành phố' // Tiêu đề trang sẽ được cập nhật trong navigation guard,
+          }
+        },
+        {
+          path: '/danh-sach-chuc-nang', // Ví dụ: /categories
+          name: 'Menu',
+          component: Menu, // Component trang Categories
+          meta: {
+            title: 'Chức năng' // Tiêu đề trang sẽ được cập nhật trong navigation guard,
           }
         }
         // Thêm các route con khác ở đây cho các tính năng khác của phần mềm

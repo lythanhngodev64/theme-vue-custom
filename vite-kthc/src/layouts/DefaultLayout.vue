@@ -6,6 +6,7 @@
         <ul class="flex space-x-4">
           <li><router-link to="/" class="hover:underline">Dashboard</router-link></li>
           <li><router-link to="/categories" class="hover:underline">Danh mục</router-link></li>
+          <li><router-link to="/danh-sach-chuc-nang" class="hover:underline">Danh sách chức năng</router-link></li>
           <li><button @click="logout" class="hover:underline">Đăng xuất</button></li>
         </ul>
       </nav>

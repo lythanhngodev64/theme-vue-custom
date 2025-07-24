@@ -1,6 +1,29 @@
 <template>
   <router-view></router-view>
+  <LoadingSpinner :isLoading="appLoading" :message="loadingMessage" />
 </template>
+
+<script setup>
+import { ref, provide } from 'vue';
+import LoadingSpinner from './components/common/LoadingSpinner.vue'; //
+
+const appLoading = ref(false);
+const loadingMessage = ref('Đang xử lý...');
+
+// Hàm để bật/tắt loading
+const showLoading = (message = 'Đang xử lý...') => {
+  loadingMessage.value = message;
+  appLoading.value = true;
+};
+
+const hideLoading = () => {
+  appLoading.value = false;
+};
+
+// Cung cấp các hàm này cho toàn bộ ứng dụng
+provide('showLoading', showLoading);
+provide('hideLoading', hideLoading);
+</script>
 
 <style scoped>
   /* Đảm bảo Tailwind CSS được import ở đây hoặc trong main.js */

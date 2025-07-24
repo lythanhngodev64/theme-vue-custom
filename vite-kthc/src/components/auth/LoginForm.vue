@@ -89,6 +89,7 @@
 <script>
 import axios from 'axios';
 import DropdownDonVi from '../controls/NtsDropdown.vue';
+import { inject } from 'vue'; // Import inject
 
 export default {
   name: 'LoginForm',
@@ -106,10 +107,17 @@ export default {
       formProductId: null
     };
   },
+  setup() {
+    // Inject các hàm showLoading và hideLoading
+    const showLoading = inject('showLoading');
+    const hideLoading = inject('hideLoading');
+    return { showLoading, hideLoading };
+  },
   methods: {
     // Phương thức mới để tải dữ liệu đơn vị từ API
     async loadDonViData() {
       try {
+        this.showLoading('Đang tải dữ liệu đơn vị...'); // Bật loading
         const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/DonVi/alldonvi`);
         
         if (response.data && response.data.results) {
@@ -129,6 +137,9 @@ export default {
         console.error('Lỗi khi tải danh sách đơn vị:', error);
         this.$toast.error('Không thể tải danh sách đơn vị. Vui lòng thử lại.');
       }
+      finally {
+        this.hideLoading(); // Tắt loading dù thành công hay thất bại
+      }
     },
     async loginSystem() {
       try {
@@ -142,14 +153,14 @@ export default {
           }
           return;
         }
-
+        this.showLoading('Đang đăng nhập...'); // Bật loading trước khi gọi API
         // 2. Chuẩn bị dữ liệu gửi đi, bao gồm cả đơn vị đã chọn
         const loginData = {
           tenDangNhap: this.username,
           matMa: this.password,
           donViId: this.selectedDonViID // Thêm ID đơn vị vào payload
         };
-
+        
         const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/api/Auth/login`, loginData, {
           headers: {
             'Content-Type': 'application/json'
@@ -193,6 +204,8 @@ export default {
           errorMessage = error.message;
         }
         this.$toast.error(errorMessage);
+      }finally {
+        this.hideLoading(); // Tắt loading dù thành công hay thất bại
       }
     },
     togglePasswordVisibility() {
