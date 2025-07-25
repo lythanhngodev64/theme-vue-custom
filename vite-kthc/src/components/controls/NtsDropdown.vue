@@ -1,6 +1,6 @@
 <template>
   <div class="nts-dropdown" ref="ntsDropdown">
-    <div class="dropdown-control">
+    <div class="dropdown-control h-10">
         <input
         type="text"
         :value="displayText"
@@ -9,7 +9,7 @@
         @keydown.down.prevent="navigateDown"
         @keydown.up.prevent="navigateUp"
         @keydown.enter.prevent="selectHighlighted"
-        :class="['w-full', 'px-4', 'py-2', 'border', 'border-gray-300', 'rounded-md', 'focus:outline-none', inputClass]"
+        :class="['w-full', 'px-4', 'py-2', 'border', 'rounded-md', 'focus:outline-none', inputClass]"
         :placeholder="placeholder"
         />
       <button @click="toggleDropdown" class="dropdown-button" type="button">▼</button>

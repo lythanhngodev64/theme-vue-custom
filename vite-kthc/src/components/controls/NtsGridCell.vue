@@ -5,19 +5,21 @@
     @dblclick="activateEdit"
   >
     <div v-if="!isEditing" class="nts-grid-cell-content px-1" :class="contentClass">
-      <slot :row="row" :value="row[column.field]">
-        <span v-if="column.dataType === 'boolean'">
-          <span :class="row[column.field] ? 'text-green-500' : 'text-red-500'">
-            {{ row[column.field] ? 'Có' : 'Không' }}
+      <slot :name="`cell-${column.field}`" :row="row" :value="row[column.field]">
+        <slot name="default-cell" :row="row" :column="column" :value="row[column.field]">
+          <span v-if="column.dataType === 'boolean'">
+            <span :class="row[column.field] ? 'text-green-500' : 'text-red-500'">
+              {{ row[column.field] ? 'Có' : 'Không' }}
+            </span>
           </span>
-        </span>
-        <span v-else-if="column.dataType === 'select'">
-          {{ getSelectDisplayText(row[column.field], column.options) }}
-        </span>
-         <span v-else-if="column.dataType === 'dropdown'">
-          {{ getDropdownDisplayText(row[column.field]) }}
-        </span>
-        <span v-else :title="row[column.field]">{{ row[column.field] }}</span>
+          <span v-else-if="column.dataType === 'select'">
+            {{ getSelectDisplayText(row[column.field], column.options) }}
+          </span>
+           <span v-else-if="column.dataType === 'dropdown'">
+            {{ getDropdownDisplayText(row[column.field]) }}
+          </span>
+          <span v-else :title="row[column.field]">{{ row[column.field] }}</span>
+        </slot>
       </slot>
     </div>
 

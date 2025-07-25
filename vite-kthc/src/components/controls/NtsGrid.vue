@@ -1,5 +1,5 @@
 <template>
-  <div class="nts-grid-container bg-white shadow-md rounded-lg overflow-hidden">
+  <div class="nts-grid-container bg-white shadow-md rounded-lg overflow-hidden" :style="gridContainerStyle">
     <div class="p-4 bg-gray-50 border-b border-gray-200">
       <div class="flex justify-between items-center gap-4">
         <div class="relative w-1/3">
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <div class="overflow-x-auto nts-grid-table-wrapper" style="max-height: 400px; overflow-y: auto;">
+    <div class="overflow-x-auto nts-grid-table-wrapper"  :style="gridTableWrapperStyle">
       <table class="min-w-full table-fixed text-sm">
         <thead class="bg-gray-100 sticky top-0 z-10">
           <tr>
@@ -39,7 +39,7 @@
             <th
               v-for="(col, index) in visibleColumns"
               :key="col.field"
-              class="p-2 font-semibold text-gray-600 uppercase tracking-wider relative"
+              class="p-2 font-semibold text-gray-600 tracking-wider relative"
               :class="[`text-${col.align || 'left'}`, { 'border-r': index < visibleColumns.length - 1 }]"
               :style="getColumnStyle(col)">
               <div class="flex items-center justify-between">
@@ -53,7 +53,7 @@
             </th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="bg-white divide-y divide-gray-200" >
           <template v-for="(row, rowIndex) in paginatedData" :key="row.isGroupHeader ? `group-${row.key}` : (row[rowKeyField] || `row-${rowIndex}`)">
             <tr v-if="row.isGroupHeader" class="bg-gray-100 hover:bg-gray-200 font-semibold cursor-pointer" @click="toggleGroup(row.key)">
               <td :colspan="fullColspan" class="p-2 text-gray-800">
@@ -85,7 +85,12 @@
                 @navigate-edit="handleNavigateEdit"
                 :class="{ 'border-r': colIndex < visibleColumns.length - 1 }"
                 :style="getColumnStyle(col)">
-                <template #default="slotProps"><slot :name="`cell-${col.field}`" v-bind="slotProps"></slot></template>
+                <template #[`cell-${col.field}`]="slotProps">
+                    <slot :name="`cell-${col.field}`" v-bind="slotProps"></slot>
+                </template>
+                <template #default="slotProps">
+                    <slot :name="`default-cell`" v-bind="slotProps"></slot>
+                </template>
               </NtsGridCell>
             </tr>
           </template>
@@ -139,7 +144,8 @@ const props = defineProps({
   data: { type: Array, required: true },
   rowKeyField: { type: String, required: true },
   selectable: { type: Boolean, default: false },
-  showGrouping: { type: Boolean, default: false }
+  showGrouping: { type: Boolean, default: false },
+  height: { type: String, default: null } // Thêm thuộc tính height
 });
 
 const emit = defineEmits([
@@ -151,7 +157,7 @@ const emit = defineEmits([
 const internalData = ref([]);
 const globalSearch = ref('');
 const currentPage = ref(1);
-const itemsPerPage = ref(10);
+const itemsPerPage = ref(50);
 const selectedRows = ref(new Set());
 const editingCell = ref(null);
 const sortBy = ref(null);
@@ -166,6 +172,26 @@ const visibleColumns = computed(() => props.columns.filter(c => c.visible !== fa
 const groupableColumns = computed(() => props.columns.filter(c => c.groupable === true));
 const groupDefinition = computed(() => props.columns.find(c => c.field === groupBy.value));
 const fullColspan = computed(() => visibleColumns.value.length + (props.selectable ? 1 : 0));
+
+// Style for the main grid container
+const gridContainerStyle = computed(() => {
+  if (props.height) {
+    return { height: props.height, display: 'flex', flexDirection: 'column' };
+  }
+  return {};
+});
+
+// Style for the table wrapper, to allow scrolling within the grid height
+const gridTableWrapperStyle = computed(() => {
+  if (props.height) {
+    // Subtract the height of header (p-4 bg-gray-50 border-b) and footer (p-4 bg-gray-50 border-t)
+    // Assuming header/footer are roughly fixed height, e.g., ~60px each
+    // This might need adjustment based on actual padding/margins.
+    // A more robust solution might involve CSS calc() or JS to get actual computed heights.
+    return { height: `calc(${props.height} - 120px)`, overflowY: 'auto' };
+  }
+  return { height: '400px', overflowY: 'auto' }; // Default if no height prop is passed
+});
 
 // --- DATA PROCESSING PIPELINE ---
 

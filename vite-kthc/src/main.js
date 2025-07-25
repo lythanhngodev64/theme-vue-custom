@@ -4,7 +4,7 @@ import router from './router'; // Import router đã cấu hình
 import './assets/css/main.css'; // Đường dẫn đến file CSS chính của bạn
 import VueToast from 'vue-toast-notification'; // Import thư viện
 import 'vue-toast-notification/dist/theme-sugar.css'; // Import CSS của theme (hoặc theme khác)
-
+import '@fortawesome/fontawesome-free/css/all.css';
 
 const app = createApp(App);
 
