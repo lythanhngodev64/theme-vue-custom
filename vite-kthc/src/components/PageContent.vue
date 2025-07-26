@@ -5,7 +5,7 @@
       <slot></slot>
     </div>
     <footer class="page-footer">
-      <span>© 2023 Bản quyền thuộc về Công ty TNHH Phát triển phần mềm Nhất Tâm - NTSoft</span>
+      <span>© 2025 Bản quyền thuộc về Công ty TNHH Phát triển phần mềm Nhất Tâm - NTSoft</span>
       <span>Phần mềm của nhà quản lý</span>
     </footer>
   </main>

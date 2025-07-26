@@ -1,6 +1,6 @@
 <template>
   <div class="nts-dropdown" ref="ntsDropdown">
-    <div class="dropdown-control h-10">
+    <div class="dropdown-control shadow-sm leading-tight focus:outline-none focus:shadow-outline">
         <input
         type="text"
         :value="displayText"
@@ -12,14 +12,14 @@
         :class="['w-full', 'px-4', 'py-2', 'border', 'rounded-md', 'focus:outline-none', inputClass]"
         :placeholder="placeholder"
         />
-      <button @click="toggleDropdown" class="dropdown-button" type="button">▼</button>
+      <button @click="toggleDropdown" class="dropdown-button bg-slate-100 text-slate-700" type="button">▼</button>
     </div>
     <ul v-if="isOpen" class="dropdown-list" :style="dropdownListStyle">
       <li v-if="headerText" class="dropdown-header-general">
         {{ headerText }}
       </li>
 
-      <li v-if="columnHeaders && columnHeaders.length > 0" class="dropdown-column-headers">
+      <li v-if="columnHeaders && columnHeaders.length > 0" class="dropdown-column-headers bg-slate-100">
         <span v-for="(header, i) in columnHeaders" :key="i" class="dropdown-column-header" :class="{ 'no-border-right': i === columnHeaders.length - 1 }" :title="header">
           {{ header }}
         </span>
@@ -309,10 +309,11 @@ export default {
 
 .dropdown-control {
   display: flex;
-  border: 1px solid #ccc;
+  border: 1px solid #e5e7eb;
   border-radius: 4px;
   overflow: hidden;
   justify-content: space-between;
+  height: 38px;
 }
 
 .dropdown-control input {
@@ -324,7 +325,7 @@ export default {
 }
 
 .dropdown-button {
-  background-color: #f0f0f0;
+  /* background-color: #f0f0f0; */
   border: none;
   padding: 8px 12px;
   cursor: pointer;
@@ -349,10 +350,10 @@ export default {
 
 /* Base style for list items (both data rows and headers) */
 .dropdown-list li {
-  display: flex;
-  gap: 10px;
-  padding: 8px 12px;
-  border-bottom: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+    padding: 4px 6px;
+    /* border-bottom: 1px solid #eee; */
 }
 
 .dropdown-list li:last-child {
@@ -391,7 +392,6 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-right: 1px solid #ddd;
   padding-right: 5px;
 }
 
@@ -407,6 +407,7 @@ export default {
 .dropdown-column.no-border-right {
   border-right: none;
   padding-right: 0;
+  text-wrap: auto;
 }
 
 /* CSS cho header chung của dropdown */
@@ -416,20 +417,20 @@ export default {
   position: sticky;
   top: 0;
   z-index: 1001;
-  border-bottom: 1px solid #eee;
+  /* border-bottom: 1px solid #eee; */
 }
 
 /* CSS cho hàng chứa các tiêu đề cột */
 .dropdown-column-headers {
-  font-weight: bold;
-  background-color: #e0e0e0;
-  border-bottom: 1px solid #ccc;
+  font-weight: 600;
+  /* background-color: #e0e0e0; */
+  /* border-bottom: 1px solid #ccc; */
   position: sticky;
   top: var(--nts-header-general-height, 0px);
   z-index: 1002;
   display: flex;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 4px 12px;
 }
 
 .dropdown-column-header {
@@ -439,7 +440,6 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
-  border-right: 1px solid #bbb;
   padding-right: 5px;
 }
 

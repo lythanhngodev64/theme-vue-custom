@@ -4,9 +4,48 @@
 
 <script>
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
-import 'tabulator-tables/dist/css/tabulator.min.css'; // Hoặc các theme CSS khác của Tabulator
-// import 'tabulator-tables/dist/css/tabulator_semanticui.min.css'; // Ví dụ một theme khác
-
+//import 'tabulator-tables/dist/css/tabulator.min.css'; // Hoặc các theme CSS khác của Tabulator
+import 'tabulator-tables/dist/css/tabulator.css'; // Ví dụ một theme khác
+const TabulatorLangsVi = {
+    "default": {
+        "columns": {
+            "name": "Name",
+        },
+        "ajax": {
+            "loading": "Đang tải...",
+            "error": "Lỗi tải dữ liệu",
+        },
+        "groups": {
+            "item": "dòng",
+            "items": "dòng",
+        },
+        "pagination": {
+            "page_size": "Kích thước",
+            "page_title": "Hiển thị",
+            "first": '<i class="fa fa-step-backward" aria-hidden="true"></i>',
+            "first_title": "Trang đầu",
+            "last": '<i class="fa fa-step-forward" aria-hidden="true"></i>',
+            "last_title": "Trang cuối",
+            "prev": '<i class="fa fa-chevron-left" aria-hidden="true"></i>',
+            "prev_title": "Lùi lại",
+            "next": '<i class="fa fa-chevron-right" aria-hidden="true"></i>',
+            "next_title": "Kế tiếp",
+            "all": "All",
+            "counter": {
+                "showing": "Hiển thị",
+                "of": "của",
+                "rows": "dòng",
+                "pages": "trang",
+            }
+        },
+        "headerFilters": {
+            "default": "Lọc cột...",
+            "columns": {
+                "name": "Lọc tên...",
+            }
+        },
+    }
+};
 export default {
   name: 'TabulatorGrid',
   props: {
@@ -50,6 +89,7 @@ export default {
   },
   mounted() {
     this.initializeTabulator();
+
   },
   methods: {
     initializeTabulator() {
@@ -58,6 +98,15 @@ export default {
         data: this.data,
         columns: this.columns,
         layout: 'fitColumns', // Tự động điều chỉnh kích thước cột cho vừa
+        rowFormatter: function(row){
+            // Loại bỏ các class 'tabulator-row-even' và 'tabulator-row-odd'
+            row.getElement().classList.remove("tabulator-row-even");
+            row.getElement().classList.remove("tabulator-row-odd");
+        },
+        paginationCounter: "rows",
+        locale: true,
+        virtualDom: false, // Tắt Virtual DOM
+        langs: TabulatorLangsVi,
         ...this.options, // Ghi đè bất kỳ tùy chọn nào được truyền qua props
       });
     },

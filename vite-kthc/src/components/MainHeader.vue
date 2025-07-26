@@ -16,7 +16,7 @@
           <ul>
             <li><a href="#"><i class="icon">ℹ️</i> Thông tin cá nhân</a></li>
             <li><a href="#"><i class="icon">🔑</i> Đổi mật khẩu</a></li>
-            <li><a href="#"><i class="icon">🚪</i> Đăng xuất</a></li>
+            <li><a href="#" @click.prevent="logout"><i class="icon">🚪</i> Đăng xuất</a></li>
           </ul>
         </div>
       </div>
@@ -35,6 +35,43 @@ export default {
     isCollapsed: {
       type: Boolean,
       default: false
+    }
+  },
+  methods: {
+    async logout() {
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (refreshToken) {
+          // [Suy luận] Thêm logic gọi API logout tại đây nếu cần
+          // Ví dụ: await this.$axios.post('/api/auth/logout', { refreshToken });
+          // this.$toast.success('Đăng xuất khỏi server thành công.');
+        }
+      } catch (error) {
+        console.error('Lỗi khi gọi API logout:', error);
+        // [Suy luận] Giả sử `this.$toast` đã được cấu hình
+        if (this.$toast && typeof this.$toast.error === 'function') {
+          this.$toast.error('Có lỗi xảy ra khi đăng xuất khỏi server.');
+        }
+        // Dù có lỗi API, vẫn tiếp tục xóa token client-side
+      }
+
+      // Xóa tất cả các token khỏi localStorage
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('tokenExpiresIn');
+      localStorage.removeItem('tokenType');
+
+      // Hiển thị thông báo đăng xuất thành công (nếu chưa hiển thị từ API)
+      // [Suy luận] Giả sử `this.$toast` đã được cấu hình
+      if (this.$toast && typeof this.$toast.info === 'function') {
+        this.$toast.info('Bạn đã đăng xuất.');
+      }
+
+      // Chuyển hướng về trang đăng nhập
+      // [Suy luận] Giả sử `this.$router` đã được cấu hình
+      if (this.$router) {
+        this.$router.push('/login');
+      }
     }
   }
 };
