@@ -181,7 +181,7 @@ export default {
           localStorage.setItem('tokenType', tokenType);
 
           this.$toast.success('Đăng nhập thành công!');
-          this.$router.push('/');
+          this.$router.push('/tong-quan');
           
         } else {
           // Nếu API trả về thành công nhưng không có dữ liệu token, coi đó là một lỗi

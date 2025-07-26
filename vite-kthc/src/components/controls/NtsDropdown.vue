@@ -28,6 +28,20 @@
       </li>
 
       <li
+        v-if="allowEmpty && (searchText === '' || emptyOptionFiltered)"
+        @click="selectEmptyOption"
+        class="cursor-pointer"
+        :class="{
+          'highlighted': emptyOptionHighlighted,
+          'selected-item-highlight': selectedItem === null
+        }"
+      >
+        <span class="dropdown-column" :class="{ 'no-border-right': displayColumns.length === 1 }">
+          {{ emptyOptionText }}
+        </span>
+      </li>
+
+      <li
         v-for="(item, index) in filteredDataSource"
         :key="item[valueField]"
         @click="selectItem(item)"
@@ -41,7 +55,7 @@
           {{ item[col] }}
         </span>
       </li>
-      <li v-if="filteredDataSource.length === 0" class="no-results">Không có kết quả</li>
+      <li v-if="filteredDataSource.length === 0 && (!allowEmpty || !emptyOptionFiltered)" class="no-results">Không có kết quả</li>
       <li v-if="enableQuickSearch" class="quick-search-footer cursor-pointer" @click="openQuickSearchModal">
         <i class="fa fa-search py-1"></i> Tìm nhanh (F3)
       </li>
@@ -120,6 +134,16 @@ export default {
     disabled: {
       type: Boolean,
       default: false
+    },
+    // Prop cho phép dòng trống
+    allowEmpty: {
+      type: Boolean,
+      default: false
+    },
+    // Text hiển thị cho dòng trống
+    emptyOptionText: {
+      type: String,
+      default: '(Không chọn)'
     }
   },
   data() {
@@ -153,12 +177,22 @@ export default {
       }
       return this.searchText;
     },
+    // Kiểm tra xem dòng trống có được lọc hay không
+    emptyOptionFiltered() {
+      return this.allowEmpty && this.emptyOptionText.toLowerCase().includes(this.searchText.toLowerCase());
+    },
+    // Kiểm tra xem dòng trống có đang được highlight hay không
+    emptyOptionHighlighted() {
+      return this.allowEmpty && this.highlightedIndex === -1 && (this.searchText === '' || this.emptyOptionFiltered);
+    }
   },
   watch: {
     initialValue: {
       immediate: true,
       handler(newVal) {
-        if (newVal !== null) {
+        if (newVal === null && this.allowEmpty) {
+          this.selectedItem = null; // Chọn dòng trống nếu initialValue là null và allowEmpty là true
+        } else if (newVal !== null) {
           this.selectedItem = this.dataSource.find(item => item[this.valueField] === newVal) || null;
         } else {
           this.selectedItem = null;
@@ -171,7 +205,7 @@ export default {
         if (this.selectedItem && !this.dataSource.find(item => item[this.valueField] === this.selectedItem[this.valueField])) {
           this.selectedItem = null;
         }
-        if (this.initialValue !== null && !this.selectedItem) {
+        if (this.initialValue !== null && !this.selectedItem && !this.allowEmpty) {
           this.selectedItem = this.dataSource.find(item => item[this.valueField] === this.initialValue) || null;
         }
       }
@@ -184,27 +218,37 @@ export default {
             this.highlightedIndex = this.filteredDataSource.findIndex(
               item => item[this.valueField] === this.selectedItem[this.valueField]
             );
-            this.ensureHighlightedInView();
+            // Điều chỉnh highlightedIndex nếu dòng trống được phép và đang chọn dòng trống
+            if (this.allowEmpty && this.selectedItem === null) {
+                this.highlightedIndex = -1;
+            }
+          } else if (this.allowEmpty) {
+              this.highlightedIndex = -1; // Highlight dòng trống khi mở nếu không có gì được chọn
           }
+          this.ensureHighlightedInView();
         });
       }
     }
   },
   methods: {
     toggleDropdown() {
-      if (this.disabled) return; // Thêm kiểm tra disabled
+      if (this.disabled) return;
       this.isOpen = !this.isOpen;
       if (this.isOpen) {
         this.searchText = '';
-        if (!this.selectedItem) {
+        if (!this.selectedItem && this.allowEmpty) {
+          this.highlightedIndex = -1; // Highlight dòng trống khi mở nếu không có gì được chọn
+        } else if (!this.selectedItem) {
           this.highlightedIndex = -1;
         }
       }
     },
     onFocus() {
-      if (this.disabled) return; // Thêm kiểm tra disabled
+      if (this.disabled) return;
       this.isOpen = true;
-      if (!this.selectedItem) {
+      if (!this.selectedItem && this.allowEmpty) {
+        this.highlightedIndex = -1; // Highlight dòng trống khi focus nếu không có gì được chọn
+      } else if (!this.selectedItem) {
         this.highlightedIndex = -1;
       }
     },
@@ -216,42 +260,75 @@ export default {
       });
     },
     onSearchInput(event) {
-        if (this.disabled) return; // Thêm kiểm tra disabled
+        if (this.disabled) return;
         this.searchText = event.target.value;
         this.isOpen = true;
-        this.highlightedIndex = -1;
-        this.selectedItem = null;
+        this.highlightedIndex = -1; // Reset highlight
+        this.selectedItem = null; // Bỏ chọn khi nhập tìm kiếm
     },
     selectItem(item) {
-      if (this.disabled) return; // Thêm kiểm tra disabled
+      if (this.disabled) return;
       this.selectedItem = item;
       this.searchText = '';
       this.isOpen = false;
       this.$emit('update:modelValue', item[this.valueField]);
       this.$emit('selected', item);
     },
+    selectEmptyOption() {
+      if (this.disabled) return;
+      this.selectedItem = null;
+      this.searchText = '';
+      this.isOpen = false;
+      this.$emit('update:modelValue', null); // Gửi giá trị null khi chọn dòng trống
+      this.$emit('selected', null); // Gửi null khi chọn dòng trống
+    },
     navigateDown() {
-      if (this.disabled) return; // Thêm kiểm tra disabled
+      if (this.disabled) return;
       if (!this.isOpen) {
         this.isOpen = true;
-        this.highlightedIndex = 0;
+        this.highlightedIndex = this.allowEmpty ? -1 : 0; // Bắt đầu highlight dòng trống hoặc item đầu tiên
         return;
       }
-      if (this.highlightedIndex < this.filteredDataSource.length - 1) {
-        this.highlightedIndex++;
+
+      const totalItems = this.filteredDataSource.length + (this.allowEmpty && this.emptyOptionFiltered ? 1 : 0);
+
+      if (this.allowEmpty && this.emptyOptionFiltered) {
+        if (this.highlightedIndex === -1) { // Đang ở dòng trống
+          this.highlightedIndex = 0; // Chuyển xuống item đầu tiên
+        } else if (this.highlightedIndex < this.filteredDataSource.length - 1) {
+          this.highlightedIndex++;
+        }
+      } else {
+        if (this.highlightedIndex < this.filteredDataSource.length - 1) {
+          this.highlightedIndex++;
+        }
       }
       this.ensureHighlightedInView();
     },
     navigateUp() {
-      if (this.disabled) return; // Thêm kiểm tra disabled
-      if (this.highlightedIndex > 0) {
-        this.highlightedIndex--;
+      if (this.disabled) return;
+      if (!this.isOpen) { // Nếu dropdown chưa mở, không làm gì
+        return;
+      }
+
+      if (this.allowEmpty && this.emptyOptionFiltered) {
+        if (this.highlightedIndex === 0) { // Đang ở item đầu tiên
+          this.highlightedIndex = -1; // Chuyển lên dòng trống
+        } else if (this.highlightedIndex > 0) {
+          this.highlightedIndex--;
+        }
+      } else {
+        if (this.highlightedIndex > 0) {
+          this.highlightedIndex--;
+        }
       }
       this.ensureHighlightedInView();
     },
     selectHighlighted() {
-      if (this.disabled) return; // Thêm kiểm tra disabled
-      if (this.highlightedIndex !== -1 && this.filteredDataSource[this.highlightedIndex]) {
+      if (this.disabled) return;
+      if (this.allowEmpty && this.highlightedIndex === -1 && this.emptyOptionFiltered) {
+        this.selectEmptyOption();
+      } else if (this.highlightedIndex !== -1 && this.filteredDataSource[this.highlightedIndex]) {
         this.selectItem(this.filteredDataSource[this.highlightedIndex]);
       } else if (this.filteredDataSource.length === 1 && this.searchText === this.displayColumns.map(col => this.filteredDataSource[0][col]).join(' - ')) {
         this.selectItem(this.filteredDataSource[0]);
@@ -260,21 +337,27 @@ export default {
     ensureHighlightedInView() {
       const list = this.$el.querySelector('.dropdown-list');
       if (list) {
-        const headerOffset = this.columnHeaders && this.columnHeaders.length > 0 ? 1 : 0;
         const generalHeaderOffset = this.headerText ? 1 : 0;
-        const quickSearchFooterOffset = this.enableQuickSearch ? 1 : 0;
+        const columnHeaderOffset = this.columnHeaders && this.columnHeaders.length > 0 ? 1 : 0;
+        const emptyOptionOffset = (this.allowEmpty && this.emptyOptionFiltered) ? 1 : 0;
 
-        let targetIndex = this.highlightedIndex;
-        if (targetIndex === -1 && this.selectedItem) {
-            targetIndex = this.filteredDataSource.findIndex(
+        let actualHighlightedIndex = -1;
+
+        if (this.allowEmpty && this.emptyOptionFiltered && this.highlightedIndex === -1) {
+            actualHighlightedIndex = generalHeaderOffset + columnHeaderOffset;
+        } else if (this.highlightedIndex !== -1) {
+            actualHighlightedIndex = generalHeaderOffset + columnHeaderOffset + emptyOptionOffset + this.highlightedIndex;
+        } else if (this.selectedItem) { // If no current highlight, try to scroll to selected item if it exists
+            const selectedDataSourceIndex = this.filteredDataSource.findIndex(
                 item => item[this.valueField] === this.selectedItem[this.valueField]
             );
+            if (selectedDataSourceIndex !== -1) {
+                actualHighlightedIndex = generalHeaderOffset + columnHeaderOffset + emptyOptionOffset + selectedDataSourceIndex;
+            }
         }
 
-        if (targetIndex !== -1 && this.filteredDataSource[targetIndex]) {
-            const actualHighlightedIndex = targetIndex + headerOffset + generalHeaderOffset;
+        if (actualHighlightedIndex !== -1 && list.children[actualHighlightedIndex]) {
             const highlightedItem = list.children[actualHighlightedIndex];
-
             if (highlightedItem) {
                 const listRect = list.getBoundingClientRect();
                 const itemRect = highlightedItem.getBoundingClientRect();
@@ -328,12 +411,12 @@ export default {
       }
     },
     openQuickSearchModal() {
-      if (this.disabled) return; // Thêm kiểm tra disabled
+      if (this.disabled) return;
       this.isOpen = false; // Đóng dropdown hiện tại
       this.showQuickSearchModal = true; // Mở modal tìm nhanh
     },
     handleQuickSearchSelectItem(item) {
-      if (this.disabled) return; // Thêm kiểm tra disabled
+      if (this.disabled) return;
       this.selectItem(item); // Chọn item từ modal
       this.showQuickSearchModal = false; // Đóng modal
     }

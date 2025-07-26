@@ -99,15 +99,10 @@ export default {
           data: this.data,
           columns: this.columns,
           layout: 'fitColumns',
-          rowFormatter: function(row){
-              row.getElement().classList.remove("tabulator-row-even");
-              row.getElement().classList.remove("tabulator-row-odd");
-          },
           paginationCounter: "rows",
           locale: true,
           langs: TabulatorLangsVi,
           ...this.options,
-
         });
         // Tích hợp sự kiện rowSelected
         this.tabulator.on("rowSelected", (row) => {
@@ -121,8 +116,11 @@ export default {
         // Tích hợp sự kiện rowClick (tùy chọn, để tự động chọn hàng khi click)
         this.tabulator.on("rowClick", (e, row) => {
             // Kiểm tra xem hàng đã được chọn chưa, nếu chưa thì chọn
-            if (!row.isSelected()) {
+            if (row.isSelected()) {
                 row.select();
+            }
+            else if(!row.isSelected()){
+              row.deselect();
             }
             // Bạn cũng có thể emit sự kiện row-click nếu muốn
             this.$emit('row-click', e, row);
@@ -181,4 +179,10 @@ export default {
     .tabulator-grid {
     min-height: 200px;
     }
+    /* Ghi đè CSS để loại bỏ màu nền xen kẽ (zebra stripes) */
+    .tabulator-row.tabulator-row-odd,
+    .tabulator-row.tabulator-row-even {
+        background-color: white; /* Hoặc màu nền mặc định bạn muốn */
+    }
+    
 </style>
