@@ -41,7 +41,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-import TabulatorGrid from '../../components/TabulatorGrid.vue';
+import TabulatorGrid from '../../components/controls/TabulatorGrid.vue';
 import EditMenuModal from '../../components/modals/EditMenuModal.vue';
 
 // --- Dữ liệu Menu ---

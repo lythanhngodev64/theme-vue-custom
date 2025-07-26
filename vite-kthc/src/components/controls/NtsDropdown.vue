@@ -12,8 +12,9 @@
         @keydown.f3.prevent="openQuickSearchModal"
         :class="['w-full', 'px-4', 'py-2', 'border', 'rounded-md', 'focus:outline-none', inputClass]"
         :placeholder="placeholder"
+        :disabled="disabled"
         />
-      <button @click="toggleDropdown" class="dropdown-button bg-slate-100 text-slate-700" type="button">▼</button>
+      <button @click="toggleDropdown" class="dropdown-button bg-slate-100 text-slate-700" type="button" :disabled="disabled">▼</button>
     </div>
     <ul v-if="isOpen" class="dropdown-list" :style="dropdownListStyle">
       <li v-if="headerText" class="dropdown-header-general">
@@ -114,6 +115,11 @@ export default {
     enableQuickSearch: {
       type: Boolean,
       default: true
+    },
+    // Thêm prop disabled
+    disabled: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -186,6 +192,7 @@ export default {
   },
   methods: {
     toggleDropdown() {
+      if (this.disabled) return; // Thêm kiểm tra disabled
       this.isOpen = !this.isOpen;
       if (this.isOpen) {
         this.searchText = '';
@@ -195,6 +202,7 @@ export default {
       }
     },
     onFocus() {
+      if (this.disabled) return; // Thêm kiểm tra disabled
       this.isOpen = true;
       if (!this.selectedItem) {
         this.highlightedIndex = -1;
@@ -208,12 +216,14 @@ export default {
       });
     },
     onSearchInput(event) {
+        if (this.disabled) return; // Thêm kiểm tra disabled
         this.searchText = event.target.value;
         this.isOpen = true;
         this.highlightedIndex = -1;
         this.selectedItem = null;
     },
     selectItem(item) {
+      if (this.disabled) return; // Thêm kiểm tra disabled
       this.selectedItem = item;
       this.searchText = '';
       this.isOpen = false;
@@ -221,6 +231,7 @@ export default {
       this.$emit('selected', item);
     },
     navigateDown() {
+      if (this.disabled) return; // Thêm kiểm tra disabled
       if (!this.isOpen) {
         this.isOpen = true;
         this.highlightedIndex = 0;
@@ -232,12 +243,14 @@ export default {
       this.ensureHighlightedInView();
     },
     navigateUp() {
+      if (this.disabled) return; // Thêm kiểm tra disabled
       if (this.highlightedIndex > 0) {
         this.highlightedIndex--;
       }
       this.ensureHighlightedInView();
     },
     selectHighlighted() {
+      if (this.disabled) return; // Thêm kiểm tra disabled
       if (this.highlightedIndex !== -1 && this.filteredDataSource[this.highlightedIndex]) {
         this.selectItem(this.filteredDataSource[this.highlightedIndex]);
       } else if (this.filteredDataSource.length === 1 && this.searchText === this.displayColumns.map(col => this.filteredDataSource[0][col]).join(' - ')) {
@@ -315,10 +328,12 @@ export default {
       }
     },
     openQuickSearchModal() {
+      if (this.disabled) return; // Thêm kiểm tra disabled
       this.isOpen = false; // Đóng dropdown hiện tại
       this.showQuickSearchModal = true; // Mở modal tìm nhanh
     },
     handleQuickSearchSelectItem(item) {
+      if (this.disabled) return; // Thêm kiểm tra disabled
       this.selectItem(item); // Chọn item từ modal
       this.showQuickSearchModal = false; // Đóng modal
     }
@@ -357,11 +372,22 @@ export default {
   width: 100%;
 }
 
+.dropdown-control input:disabled {
+  background-color: #f3f4f6; /* Màu nền xám khi disabled */
+  cursor: not-allowed;
+}
+
 .dropdown-button {
   border: none;
   padding: 8px 12px;
   cursor: pointer;
   flex-shrink: 0;
+}
+
+.dropdown-button:disabled {
+  background-color: #f3f4f6; /* Màu nền xám khi disabled */
+  cursor: not-allowed;
+  color: #9ca3af; /* Màu chữ xám khi disabled */
 }
 
 .dropdown-list {
@@ -399,6 +425,7 @@ export default {
   font-weight: bold;
   color: #1890ff;
 }
+
 
 .dropdown-list li.selected-item-highlight.highlighted {
   background-color: #cceeff;

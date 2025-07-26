@@ -59,7 +59,7 @@
 </template>
 
 <script>
-import TabulatorGrid from '../TabulatorGrid.vue';
+import TabulatorGrid from '../controls/TabulatorGrid.vue';
 
 export default {
   components: {

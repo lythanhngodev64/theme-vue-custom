@@ -62,6 +62,7 @@
                 :dropdown-width="'100%'"
                 :max-height="'200px'"
                 :column-headers="['Mã Menu', 'Tên Menu']"
+                :disabled="false"
                 @update:modelValue="editedItem.MaMenu_Cha = $event"
                 @selected="handleParentMenuSelected"
                 class="w-full"
@@ -112,16 +113,21 @@
               <label for="nhomMenu" class="block text-gray-700 text-md mb-1">
                 Nhóm menu
               </label>
-              <select
-                id="nhomMenu"
-                v-model="editedItem.NhomMenu"
-                class="shadow-sm appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              >
-                <option :value="null">-- Chọn nhóm menu --</option>
-                <option v-for="option in menuGroups" :key="option.value" :value="option.value">
-                  {{ option.text }}
-                </option>
-              </select>
+              <NtsDropdown
+                :data-source="menuGroupsData"
+                value-field="MenuGroupID"
+                :display-columns="['MaMenuGroup', 'TenMenuGroup']"
+                :initial-value="editedItem.MenuGroupID"
+                selected-display-column="TenMenuGroup"
+                placeholder="Chọn Nhóm"
+                :dropdown-width="'100%'"
+                :max-height="'200px'"
+                :column-headers="['Mã nhóm', 'Tên nhóm']"
+                :disabled="false"
+                @update:modelValue="editedItem.MenuGroupID = $event"
+                @selected="handleGroupMenuSelected"
+                class="w-full"
+              />
             </div>
             <div class="flex items-center">
                 <div class="w-1/2 pr-2">
@@ -219,6 +225,7 @@
 <script setup>
 import { ref, watch } from 'vue';
 import NtsDropdown from '../controls/NtsDropdown.vue'; // Đảm bảo đường dẫn đúng
+import axios from 'axios';
 
 const props = defineProps({
   visible: {
@@ -239,6 +246,24 @@ const emit = defineEmits(['update:visible', 'save']);
 
 const isVisible = ref(props.visible);
 const editedItem = ref({});
+const menuGroupsData = ref([]); // State mới để lưu dữ liệu nhóm menu
+const accessToken = localStorage.getItem('accessToken');
+// Load data cho nhóm menu
+const loadMenuGroupsData = async () => {
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/api/MenuGroup/allMenuGroup`, {
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+    if (response.data && response.data.results) {
+      menuGroupsData.value = response.data.results;
+    }
+  } catch (error) {
+    console.error('Lỗi khi tải danh sách Nhóm Menu:', error);
+    // Có thể thêm thông báo lỗi cho người dùng
+  }
+};
 
 // Data for other dropdowns (these are still static examples)
 const projectStages = ref([
@@ -262,9 +287,11 @@ const dauThauOptions = ref([
   { value: 'LAPKHLC', text: 'Lập KHLC' },
 ]);
 
-
 watch(() => props.visible, (newVal) => {
   isVisible.value = newVal;
+  if (newVal) {
+    loadMenuGroupsData(); // Tải dữ liệu nhóm menu mỗi khi modal được mở
+  }
 });
 
 watch(() => props.menuItem, (newVal) => {
@@ -288,6 +315,14 @@ const handleParentMenuSelected = (selectedMenu) => {
   } else {
     editedItem.value.MaMenu_Cha = null;
     editedItem.value.TenMenu_Cha = null;
+  }
+};
+
+const handleGroupMenuSelected = (selectedGroup) => {
+  if (selectedGroup) {
+    editedItem.value.MenuGroupID = selectedGroup.MenuGroupID;
+  } else {
+    editedItem.value.MenuGroupID = null;
   }
 };
 </script>
