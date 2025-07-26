@@ -4,8 +4,8 @@
 
 <script>
 import { TabulatorFull as Tabulator } from 'tabulator-tables';
-//import 'tabulator-tables/dist/css/tabulator.min.css'; // Hoặc các theme CSS khác của Tabulator
-import 'tabulator-tables/dist/css/tabulator.css'; // Ví dụ một theme khác
+import 'tabulator-tables/dist/css/tabulator.css';
+
 const TabulatorLangsVi = {
     "default": {
         "columns": {
@@ -46,6 +46,7 @@ const TabulatorLangsVi = {
         },
     }
 };
+
 export default {
   name: 'TabulatorGrid',
   props: {
@@ -64,20 +65,21 @@ export default {
   },
   data() {
     return {
-      tabulator: null, // Biến để lưu trữ đối tượng Tabulator
+      tabulator: null,
     };
   },
   watch: {
-    // Theo dõi sự thay đổi của dữ liệu để cập nhật lưới Tabulator
     data: {
       handler(newData) {
         if (this.tabulator) {
-          this.tabulator.replaceData(newData);
+          // Sử dụng replaceData để cập nhật dữ liệu một cách hiệu quả
+          this.tabulator.replaceData(newData).catch(error => {
+            console.error("Lỗi khi cập nhật dữ liệu cho Tabulator:", error);
+          });
         }
       },
-      deep: true, // Quan trọng để theo dõi sự thay đổi bên trong mảng
+      deep: true,
     },
-    // Theo dõi sự thay đổi của cột để cập nhật lưới Tabulator
     columns: {
       handler(newColumns) {
         if (this.tabulator) {
@@ -89,33 +91,57 @@ export default {
   },
   mounted() {
     this.initializeTabulator();
-
   },
   methods: {
     initializeTabulator() {
-      // Khởi tạo Tabulator trên phần tử DOM được tham chiếu
-      this.tabulator = new Tabulator(this.$refs.tabulator, {
-        data: this.data,
-        columns: this.columns,
-        layout: 'fitColumns', // Tự động điều chỉnh kích thước cột cho vừa
-        rowFormatter: function(row){
-            // Loại bỏ các class 'tabulator-row-even' và 'tabulator-row-odd'
-            row.getElement().classList.remove("tabulator-row-even");
-            row.getElement().classList.remove("tabulator-row-odd");
-        },
-        paginationCounter: "rows",
-        locale: true,
-        virtualDom: false, // Tắt Virtual DOM
-        langs: TabulatorLangsVi,
-        ...this.options, // Ghi đè bất kỳ tùy chọn nào được truyền qua props
-      });
+      if (this.$refs.tabulator) {
+        this.tabulator = new Tabulator(this.$refs.tabulator, {
+          data: this.data,
+          columns: this.columns,
+          layout: 'fitColumns',
+          rowFormatter: function(row){
+              row.getElement().classList.remove("tabulator-row-even");
+              row.getElement().classList.remove("tabulator-row-odd");
+          },
+          paginationCounter: "rows",
+          locale: true,
+          langs: TabulatorLangsVi,
+          ...this.options,
+
+        });
+        // Tích hợp sự kiện rowSelected
+        this.tabulator.on("rowSelected", (row) => {
+            // emit sự kiện tùy chỉnh 'row-selected' với dữ liệu của hàng
+            this.$emit('row-selected', row.getData());
+        });
+        // Tích hợp sự kiện rowDeselected (tùy chọn, để xử lý khi hàng bị bỏ chọn)
+        this.tabulator.on("rowDeselected", (row) => {
+            this.$emit('row-deselected', row.getData());
+        });
+        // Tích hợp sự kiện rowClick (tùy chọn, để tự động chọn hàng khi click)
+        this.tabulator.on("rowClick", (e, row) => {
+            // Kiểm tra xem hàng đã được chọn chưa, nếu chưa thì chọn
+            if (!row.isSelected()) {
+                row.select();
+            }
+            // Bạn cũng có thể emit sự kiện row-click nếu muốn
+            this.$emit('row-click', e, row);
+        });
+
+        console.log("Tabulator initialized:", this.tabulator);
+        this.$emit('initialized');
+      } else {
+        console.error("Không tìm thấy phần tử DOM để khởi tạo Tabulator.");
+      }
     },
-    // Các phương thức tiện ích khác để tương tác với Tabulator nếu cần
     getData() {
       return this.tabulator ? this.tabulator.getData() : [];
     },
     getSelectedRows() {
       return this.tabulator ? this.tabulator.getSelectedRows().map(row => row.getData()) : [];
+    },
+    getSelectedData() {
+      return this.tabulator ? this.tabulator.getSelectedData() : [];
     },
     setSelectedRows(data) {
       if (this.tabulator) {
@@ -129,24 +155,30 @@ export default {
     },
     setData(data) {
       if (this.tabulator) {
-        this.tabulator.setData(data);
+        try {
+          // Trả về Promise từ setData của Tabulator để component cha có thể .then()
+          return this.tabulator.setData(JSON.parse(JSON.stringify(data)));
+        } catch (error) {
+          console.error("Lỗi khi thiết lập dữ liệu cho Tabulator:", error);
+          return Promise.reject(error); // Trả về Promise rejected nếu có lỗi
+        }
+      } else {
+        console.warn("Tabulator chưa được khởi tạo. Không thể thiết lập dữ liệu.");
+        return Promise.reject(new Error("Tabulator not initialized")); // Trả về Promise rejected
       }
     },
   },
   beforeUnmount() {
-    // Đảm bảo hủy Tabulator khi component bị hủy để tránh rò rỉ bộ nhớ
     if (this.tabulator) {
       this.tabulator.destroy();
+      this.tabulator = null;
     }
   },
 };
 </script>
 
 <style scoped>
-    /* Bạn có thể thêm các style tùy chỉnh cho container Tabulator ở đây nếu cần */
     .tabulator-grid {
-    /* Ví dụ */
     min-height: 200px;
     }
-    
 </style>

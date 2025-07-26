@@ -115,9 +115,9 @@ const tabulatorOptions = ref({
   pagination: 'local',
   paginationSize: 50,
   paginationSizeSelector: [10, 25, 50, 100],
-  movableColumns: true,
+  movableColumns: false,
   resizableColumns: true,
-  tooltips: true,
+  selectableRows: 1,
   cellEdited: function(cell){
     // Xử lý khi một ô được chỉnh sửa trực tiếp trên grid
     const rowData = cell.getRow().getData();

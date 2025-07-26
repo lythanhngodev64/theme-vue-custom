@@ -9,6 +9,7 @@
         @keydown.down.prevent="navigateDown"
         @keydown.up.prevent="navigateUp"
         @keydown.enter.prevent="selectHighlighted"
+        @keydown.f3.prevent="openQuickSearchModal"
         :class="['w-full', 'px-4', 'py-2', 'border', 'rounded-md', 'focus:outline-none', inputClass]"
         :placeholder="placeholder"
         />
@@ -40,12 +41,30 @@
         </span>
       </li>
       <li v-if="filteredDataSource.length === 0" class="no-results">Không có kết quả</li>
+      <li v-if="enableQuickSearch" class="quick-search-footer cursor-pointer" @click="openQuickSearchModal">
+        <i class="fa fa-search py-1"></i> Tìm nhanh (F3)
+      </li>
     </ul>
+
+    <NtsQuickSearchModal
+      v-if="showQuickSearchModal"
+      :dataSource="dataSource"
+      :displayColumns="displayColumns"
+      :valueField="valueField"
+      :columnHeaders="columnHeaders"
+      @close="showQuickSearchModal = false"
+      @select-item="handleQuickSearchSelectItem"
+    />
   </div>
 </template>
 
 <script>
+import NtsQuickSearchModal from '../modals/NtsQuickSearchModal.vue'; // Giả định bạn tạo file này
+
 export default {
+  components: {
+    NtsQuickSearchModal
+  },
   props: {
     dataSource: {
       type: Array,
@@ -83,15 +102,19 @@ export default {
       type: String,
       default: '100%'
     },
-    // Thêm prop mới cho chiều cao tối đa của dropdown list
     maxHeight: {
       type: String,
-      default: '200px' // Giá trị mặc định nếu không được cung cấp
+      default: '200px'
     },
     placeholder: {
       type: String,
       default: 'Tìm kiếm hoặc chọn...'
     },
+    // Thêm prop mới để điều khiển hiển thị nút tìm nhanh
+    enableQuickSearch: {
+      type: Boolean,
+      default: true
+    }
   },
   data() {
     return {
@@ -99,7 +122,8 @@ export default {
       searchText: '',
       selectedItem: null,
       highlightedIndex: -1,
-      dropdownListStyle: {}
+      dropdownListStyle: {},
+      showQuickSearchModal: false // Trạng thái hiển thị modal
     };
   },
   computed: {
@@ -225,6 +249,7 @@ export default {
       if (list) {
         const headerOffset = this.columnHeaders && this.columnHeaders.length > 0 ? 1 : 0;
         const generalHeaderOffset = this.headerText ? 1 : 0;
+        const quickSearchFooterOffset = this.enableQuickSearch ? 1 : 0;
 
         let targetIndex = this.highlightedIndex;
         if (targetIndex === -1 && this.selectedItem) {
@@ -276,7 +301,7 @@ export default {
       this.dropdownListStyle = {
         width: `${calculatedWidth}px`,
         left: `${leftOffset}px`,
-        maxHeight: this.maxHeight // Áp dụng maxHeight từ prop
+        maxHeight: this.maxHeight
       };
 
       if (this.headerText) {
@@ -288,6 +313,14 @@ export default {
       } else {
         this.$el.style.setProperty('--nts-header-general-height', '0px');
       }
+    },
+    openQuickSearchModal() {
+      this.isOpen = false; // Đóng dropdown hiện tại
+      this.showQuickSearchModal = true; // Mở modal tìm nhanh
+    },
+    handleQuickSearchSelectItem(item) {
+      this.selectItem(item); // Chọn item từ modal
+      this.showQuickSearchModal = false; // Đóng modal
     }
   },
   mounted() {
@@ -325,7 +358,6 @@ export default {
 }
 
 .dropdown-button {
-  /* background-color: #f0f0f0; */
   border: none;
   padding: 8px 12px;
   cursor: pointer;
@@ -337,7 +369,6 @@ export default {
   top: 100%;
   border: 1px solid #ccc;
   border-top: none;
-  /* max-height: 200px; <- Dòng này sẽ bị ghi đè bởi JS style */
   overflow-y: auto;
   list-style: none;
   padding: 0;
@@ -348,12 +379,10 @@ export default {
   box-sizing: border-box;
 }
 
-/* Base style for list items (both data rows and headers) */
 .dropdown-list li {
     display: flex;
     gap: 10px;
     padding: 4px 6px;
-    /* border-bottom: 1px solid #eee; */
 }
 
 .dropdown-list li:last-child {
@@ -365,14 +394,12 @@ export default {
   background-color: #f0f0f0;
 }
 
-/* Style for the permanently selected item */
 .dropdown-list li.selected-item-highlight {
   background-color: #e6f7ff;
   font-weight: bold;
   color: #1890ff;
 }
 
-/* Ensure selected-item-highlight can be overridden by highlighted when navigating */
 .dropdown-list li.selected-item-highlight.highlighted {
   background-color: #cceeff;
 }
@@ -385,7 +412,6 @@ export default {
   border-bottom: none;
 }
 
-/* Styles for individual columns within a data row */
 .dropdown-column {
   flex-grow: 1;
   flex-basis: 0;
@@ -403,28 +429,22 @@ export default {
     padding-right: 0;
 }
 
-/* Remove border from the last column */
 .dropdown-column.no-border-right {
   border-right: none;
   padding-right: 0;
   text-wrap: auto;
 }
 
-/* CSS cho header chung của dropdown */
 .dropdown-header-general {
   font-weight: bold;
   background-color: #f5f5f5;
   position: sticky;
   top: 0;
   z-index: 1001;
-  /* border-bottom: 1px solid #eee; */
 }
 
-/* CSS cho hàng chứa các tiêu đề cột */
 .dropdown-column-headers {
   font-weight: 600;
-  /* background-color: #e0e0e0; */
-  /* border-bottom: 1px solid #ccc; */
   position: sticky;
   top: var(--nts-header-general-height, 0px);
   z-index: 1002;
@@ -443,9 +463,24 @@ export default {
   padding-right: 5px;
 }
 
-/* Remove border from the last column header */
 .dropdown-column-header.no-border-right {
   border-right: none;
   padding-right: 0;
+}
+
+.quick-search-footer {
+  padding: 8px 12px;
+  color: #1890ff;
+  font-weight: bold;
+  border-top: 1px solid #eee;
+  text-align: center;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+  z-index: 1001;
+}
+
+.quick-search-footer:hover {
+  background-color: #e6f7ff;
 }
 </style>
